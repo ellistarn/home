@@ -8,4 +8,5 @@ function cleanup() {
 trap cleanup exit
 
 # Install https://github.com/ohmyzsh/ohmyzsh
-sh -c "$(KEEP_ZSHRC=yes wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+KEEP_ZSHRC=yes
+sh -c "$(wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
