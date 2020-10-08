@@ -1,1 +1,31 @@
-/Users/etarn/workspaces/go/src/github.com/ellistarn/dotfiles/src/shell/bashrc_personal
+##### Homerolled #####
+export PATH=$HOME/bin:${PATH}
+
+##### Completion #####
+# https://github.com/scop/bash-completion
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
+##### Overrides #####
+source_mac_overrides $HOME/.bashrc_personal_osx
+
+export GITHUB_USER=ellistarn
+
+export KUBECONFIG=$HOME/.kube/config
+#export PATH=$PATH:/usr/local/kubebuilder/bin
+
+export GOPATH=$HOME/workspaces/go
+export PATH=$PATH:$GOPATH/bin
+
+alias python=python3
+
+export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com"
+export REGISTRY=$KO_DOCKER_REPO
+export EDITOR="code -w"
+export KUBE_EDITOR="code -w"
+
+alias k='kubectl'
+alias kctx="kubectx"
+alias kns="kubens"
+
+source <(curl -s https://raw.githubusercontent.com/ellistarn/images/main/debug/aliases)
+

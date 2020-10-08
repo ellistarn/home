@@ -1,1 +1,24 @@
-/Users/etarn/workspaces/go/src/github.com/ellistarn/dotfiles/src/git/gitignore
+# Ignore everything
+*
+
+# Include setup
+!README.md
+!bin/
+!bin/*
+
+# Include git
+!.gitignore
+!.gitignore.global
+!.gitconfig
+
+# Include vim
+!.vimrc
+!.vim
+
+# Include zsh 
+!.zshrc
+
+# Include bashrc
+!.bashrc
+!.bashrc_personal
+!.bashrc_personal_osx
