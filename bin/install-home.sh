@@ -3,4 +3,5 @@
 cd ~
 git init
 git remote add origin git@github.com:ellistarn/home.git
-git pull
+git fetch origin
+git reset --hard origin/main

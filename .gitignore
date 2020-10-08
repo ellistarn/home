@@ -15,10 +15,10 @@
 !.vimrc
 !.vim
 
-# Include zsh 
+# Include zsh
 !.zshrc
 
 # Include bashrc
 !.bashrc
-!.bashrc_personal
-!.bashrc_personal_osx
+!.bashrc.dev
+!.bashrc.dev.osx
