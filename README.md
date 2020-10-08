@@ -1,2 +1,2 @@
-# -
-etarn's home environment
+# Overview
+This is ellistarn's home directory
