@@ -1,7 +1,8 @@
 #!/bin/zsh
 
 #### INITIALZE ZSH ####
-ZSH_THEME="robbyrussell"
+# ZSH_THEME="robbyrussell"
+ZSH_THEME="cobalt2"
 export ZSH=$HOME/.oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
@@ -21,4 +22,3 @@ compdef _ssh colorssh=ssh
 autoload bashcompinit && bashcompinit
 
 source ~/.bashrc
-
