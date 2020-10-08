@@ -7,7 +7,7 @@ source $ZSH/oh-my-zsh.sh
 
 #### Plugins ####
 plugins=(git kubectl)
-source /usr/local/opt/kube-ps1/share/kube-ps1.sh
+# source /usr/local/opt/kube-ps1/share/kube-ps1.sh
 
 #### Keybindings ####
 bindkey -e
