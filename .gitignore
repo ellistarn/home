@@ -19,6 +19,4 @@
 !.zshrc
 
 # Include bashrc
-!.bashrc
-!.bashrc.dev
-!.bashrc.dev.osx
+!*.bashrc
