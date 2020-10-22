@@ -1,6 +1,4 @@
-for file in $(ls -a | egrep '.+.bashrc') ; do
-	if [ -f "$file" ] ; then
-		echo Sourcing $file
-		source $file
-	fi
+for file in $(ls -a $HOME | egrep '.+.bashrc') ; do
+	echo Sourcing $file
+	source ~/$file
 done

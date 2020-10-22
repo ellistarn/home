@@ -7,7 +7,6 @@ export PATH=$HOME/bin:${PATH}
 
 export GITHUB_USER=ellistarn
 export KUBECONFIG=$HOME/.kube/config
-#export PATH=$PATH:/usr/local/kubebuilder/bin
 
 export GOPATH=$HOME/workspaces/go
 export PATH=$PATH:$GOPATH/bin
