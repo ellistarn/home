@@ -22,6 +22,7 @@ export AWS_DEFAULT_OUTPUT=json
 export AWS_SDK_LOAD_CONFIG=true
 
 # Kubernetes Setup
+export CLOUD_PROVIDER="aws"
 export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com"
 export REGISTRY=$KO_DOCKER_REPO
 export EDITOR="code -w"
@@ -32,3 +33,7 @@ alias kctx="kubectx"
 alias kns="kubens"
 
 source <(curl -s https://raw.githubusercontent.com/ellistarn/images/main/debug/aliases)
+
+function ecr_login {
+  aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $REGISTRY
+}
