@@ -34,6 +34,10 @@ alias kns="kubens"
 
 source <(curl -s https://raw.githubusercontent.com/ellistarn/images/main/debug/aliases)
 
+function aws_account {
+  aws sts get-caller-identity | jq -r ".Account"
+}
+
 function ecr_login {
-  aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $REGISTRY
+  aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
 }

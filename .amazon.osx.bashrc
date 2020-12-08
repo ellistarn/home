@@ -15,5 +15,4 @@ MIDWAY_TIMEOUT_SECONDS=43200 # 12 hours
 if ! test `find ~/.ssh/id_rsa-cert.pub -mtime -${MIDWAY_TIMEOUT_SECONDS}s`
 then
   midway_login
-  ecr_login
 fi
