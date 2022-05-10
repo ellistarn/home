@@ -4,6 +4,8 @@
 # Include README
 !README.md
 
+# Include bin
+
 # Include git
 !.gitignore
 !.gitignore.global
@@ -16,3 +18,4 @@
 !.*rc
 !*.aliases
 !bin/**/*
+!bin
