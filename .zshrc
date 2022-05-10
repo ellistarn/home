@@ -51,8 +51,7 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 
 zstyle ':completion:*' insert-tab pending                                       # pasting with tabs doesn't perform completion
 zstyle ':completion:*' completer _expand _complete _files _correct _approximate # default to file completion
 
-# autoload -Uz compinit && compinit
-
+autoload -Uz compinit && compinit
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 source <(kubectl completion zsh)
 complete -C '/usr/local/aws-cli/aws_completer' aws
