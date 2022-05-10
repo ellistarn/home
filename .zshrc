@@ -82,6 +82,3 @@ function ecr_login() {
 
 ##### Amazon #####
 source $HOME/.amazonrc
-
-##### OS #####
-source $HOME/.osxrc
