@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+##### OSX #####
+echo Initializing OSX
+
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+  compinit
+fi
+
+eval "$(zoxide init zsh)"
+

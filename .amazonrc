@@ -1,0 +1,63 @@
+#!/bin/zsh
+
+export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-78736fbc.us-west-2.amazon.com #etarn.corp.amazon.com
+export BRAZIL_WORKSPACE=workspaces/brazil
+export WS=$HOME/workspaces/brazil
+
+export SAM_ACCOUNT=$AWS_ACCOUNT_ID
+export SAM_ISENGARD_ROLE_NAME=Admin
+export SAM_REGION=us-west-2
+export SAM_AWS_PARTITION=aws
+
+export WESLEY_DEV_STACK_DNS="etarn.us-west-2.dev.holograph.space"
+export WESLEY_DEV_FRONTEND_API_GATEWAY_URL=https://z15tesp5re.execute-api.us-west-2.amazonaws.com/Stage/
+
+scp_dev() {
+  scp -r $DEV_DESKTOP_HOST:$@
+}
+
+dev_tunnel() {
+  ssh -L "$1":localhost:"$1" $DEV_DESKTOP_HOST -f -N
+}
+
+aws_login() {
+  ACCOUNT=${1:-$AWS_ACCOUNT_ID}
+  ROLE=${2:-Admin}
+  open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
+}
+
+alias bb="brazil-build"
+alias bbr="brazil-build release"
+alias bbt="brazil-build test"
+alias bbc="brazil-build clean"
+alias bup="brazil ws --use --package"
+alias brp="yes | brazil ws --remove --package"
+alias bws="brazil ws --sync --metadata"
+alias bba="brazil-recursive-cmd brazil-build --allPackages"
+alias sam="brazil-build-tool-exec sam"
+alias deveks="aws eks --endpoint $WESLEY_DEV_FRONTEND_API_GATEWAY_URL"
+
+export PATH=/apollo/env/envImprovement/bin:$PATH
+export PATH=/apollo/env/AmazonAwsCli/bin/:$PATH
+export PATH=/apollo/env/SDETools/bin:$PATH
+export PATH=$PATH:$HOME/.toolbox/bin
+export PATH=$PATH:$HOME/workspaces/brazil/EKSAdm/src/EksAdm/build/bin
+export PATH=$PATH:$HOME/workspaces/brazil/GoAmzn-EKSOpsTooling/src/GoAmzn-EKSOpsTooling/build/bin
+export PATH=$PATH:$HOME/workspaces/brazil/EKSDataPlaneAutoScalingService/src/EKSDataPlaneAutoScalingService/build/bin
+
+export AUTH_HOST=$DEV_DESKTOP_HOST
+
+if [[ $(uname) != 'Darwin' ]]; then
+  return 0
+fi
+
+# Aliases
+alias ssh-dev="ssh $DEV_DESKTOP_HOST"
+alias ssh-dev-multiplex="ssh $DEV_DESKTOP_HOST 'exit'"
+alias ssh-dev-exit="ssh -O exit $DEV_DESKTOP_HOST"
+
+# Authentication Setup
+MIDWAY_TIMEOUT_SECONDS=43200 # 12 hours
+if ! test $(find ~/.ssh/id_rsa-cert.pub -mtime -${MIDWAY_TIMEOUT_SECONDS}s); then
+  mwinit --aea
+fi

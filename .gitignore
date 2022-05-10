@@ -1,0 +1,18 @@
+# Ignore everything
+*
+
+# Include README
+!README.md
+
+# Include git
+!.gitignore
+!.gitignore.global
+!.gitconfig
+
+# Include shell
+!.zshrc
+!.antigen.zsh
+!.antigenrc
+!.*rc
+!*.aliases
+!bin/**/*

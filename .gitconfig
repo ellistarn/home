@@ -1,0 +1,24 @@
+[user]
+	name = Ellis Tarn
+	email = ellistarn@gmail.com
+
+[core]
+	pager = less -FMRiX
+	editor = vim
+	excludesfile = /Users/etarn/.gitignore.global
+
+[push]
+	default = simple
+
+[alias]
+	graph = log --graph --all --pretty=format:\"%C(yellow)%h%Creset%C(cyan)%C(bold)%d%Creset %C(cyan)(%cr)%Creset %C(green)%<(12)%cn%Creset %s\"
+
+[color]
+	ui = auto
+
+[credential]
+	helper = osxkeychain
+	UseHttpPath = true
+
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
