@@ -41,11 +41,6 @@ setopt HIST_VERIFY        # let you edit !$, !! and !* before executing the comm
 setopt HIST_IGNORE_DUPS   # do not store duplications
 setopt HIST_REDUCE_BLANKS # removes blank lines from history
 
-##### Keybindings #####
-bindkey -e
-bindkey '\e\e[C' forward-word
-bindkey '\e\e[D' backward-word
-
 ##### Completion #####
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' insert-tab pending                                       # pasting with tabs doesn't perform completion
