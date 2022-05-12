@@ -3,7 +3,6 @@
 ##### Antigen #####
 source $HOME/.antigen.zsh
 antigen init $HOME/.antigenrc
-
 ##### Paths #####
 path+=(/usr/local/opt/gnu-sed/libexec/gnubin) # GNU Sed for compatibility
 path+=($HOME/go/bin)
@@ -50,6 +49,16 @@ autoload -Uz compinit && compinit
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 source <(kubectl completion zsh)
 complete -C '/usr/local/aws-cli/aws_completer' aws
+
+##### Keybindings #####
+# https://github.com/jeffreytse/zsh-vi-mode#execute-extra-commands
+function zvm_after_init() {
+  bindkey '\e\e[C' forward-word
+  bindkey '\e\e[D' backward-word
+  bindkey "^[[A" history-beginning-search-backward
+  bindkey "^[[B" history-beginning-search-forward
+}
+
 
 ##### Github #####
 export GITHUB_USER=ellistarn
