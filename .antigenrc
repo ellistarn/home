@@ -19,7 +19,6 @@ antigen bundles <<BUNDLES
 
     ael-code/zsh-colored-man-pages
     jeffreytse/zsh-vi-mode
-    popstas/zsh-command-time
     zsh-users/zsh-autosuggestions
     zsh-users/zsh-completions
     zsh-users/zsh-history-substring-search
