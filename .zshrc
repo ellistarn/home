@@ -3,6 +3,10 @@
 ##### Antigen #####
 source $HOME/.antigen.zsh
 antigen init $HOME/.antigenrc
+
+##### Powerlevel10k #####
+source ~/.p10k.zsh
+
 ##### Paths #####
 path+=(/usr/local/opt/gnu-sed/libexec/gnubin) # GNU Sed for compatibility
 path+=($HOME/go/bin)
@@ -55,10 +59,15 @@ complete -C '/usr/local/aws-cli/aws_completer' aws
 function zvm_after_init() {
   bindkey '\e\e[C' forward-word
   bindkey '\e\e[D' backward-word
-  bindkey "^[[A" history-beginning-search-backward
-  bindkey "^[[B" history-beginning-search-forward
+  bindkey '^[[A' history-beginning-search-backward
+  bindkey '^[[B' history-beginning-search-forward
 }
-
+function zvm_after_lazy_keybindings() {
+  #bindkey -M vicmd 'k' history-beginning-search-backward
+  #bindkey -M vicmd 'j' history-beginning-search-forward
+  bindkey -M vicmd '^[[A' history-beginning-search-backward
+  bindkey -M vicmd '^[[B' history-beginning-search-forward
+}
 
 ##### Github #####
 export GITHUB_USER=ellistarn

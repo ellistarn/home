@@ -26,5 +26,5 @@ antigen bundles <<BUNDLES
     zsh-users/zsh-syntax-highlighting
 BUNDLES
 
-antigen theme robbyrussell themes/agnoster
+antigen theme romkatv/powerlevel10k
 antigen apply

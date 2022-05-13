@@ -13,6 +13,7 @@
 
 # Include shell
 !.zshrc
+!.p10k.zsh
 !.antigen.zsh
 !.antigenrc
 !.*rc
