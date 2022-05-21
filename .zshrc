@@ -67,10 +67,12 @@ function zvm_after_init() {
   bindkey '^[[B' history-beginning-search-forward
 }
 function zvm_after_lazy_keybindings() {
-  #bindkey -M vicmd 'k' history-beginning-search-backward
-  #bindkey -M vicmd 'j' history-beginning-search-forward
+  bindkey -M vicmd '\e\e[C' forward-word
+  bindkey -M vicmd '\e\e[D' backward-word
   bindkey -M vicmd '^[[A' history-beginning-search-backward
   bindkey -M vicmd '^[[B' history-beginning-search-forward
+  bindkey -M vicmd 'k' history-beginning-search-backward
+  bindkey -M vicmd 'j' history-beginning-search-forward
 }
 
 ##### Github #####
