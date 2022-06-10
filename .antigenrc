@@ -10,11 +10,8 @@ antigen bundles <<BUNDLES
     b4b4r07/enhancd
     colorize
     command-not-found
-    docker
     git
-    golang
     lein
-    magic-enter
     safe-paste
 
     ael-code/zsh-colored-man-pages
