@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-78736fbc.us-west-2.amazon.com #etarn.corp.amazon.com
+export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-90cd7c8f.us-west-2.amazon.com #etarn.corp.amazon.com
 export BRAZIL_WORKSPACE=workspaces/brazil
 export WS=$HOME/workspaces/brazil
 
@@ -21,7 +21,7 @@ dev_tunnel() {
 }
 
 aws_login() {
-  ACCOUNT=${1:-$AWS_ACCOUNT_ID}
+  ACCOUNT=${1:-$(aws_account)}
   ROLE=${2:-Admin}
   open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
 }
