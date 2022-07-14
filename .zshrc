@@ -91,6 +91,22 @@ source <(kubectl completion zsh)
 function instanceid() {
   kubectl get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/'
 }
+##### Github #####
+export GITHUB_USER=ellistarn
+# export GITHUB_TOKEN=$(cat $HOME/.git/token)
+
+##### Kubernetes #####
+export CLOUD_PROVIDER="aws"
+export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/dev"
+export KUBE_EDITOR="code -w"
+
+##### AWS #####
+export AWS_PROFILE=default
+export AWS_ACCOUNT_ID=767520670908
+export AWS_DEFAULT_REGION=us-west-2
+export AWS_PAGER=
+export AWS_DEFAULT_OUTPUT=json
+export AWS_SDK_LOAD_CONFIG=true
 
 function ssmnode() {
   aws ssm start-session --target $(instanceid $1)
@@ -105,6 +121,11 @@ function aws_account() {
 }
 function ecr_login() {
   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
+}
+function aws_login() {
+  ACCOUNT=${1:-$AWS_ACCOUNT_ID}
+  ROLE=${2:-Admin}
+  open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
 }
 
 # >>> conda initialize >>>
