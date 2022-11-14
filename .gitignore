@@ -4,6 +4,9 @@
 # Include README
 !README.md
 
+# Include Brew
+!Brewfile
+
 # Include bin
 
 # Include git
