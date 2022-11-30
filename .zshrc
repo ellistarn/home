@@ -80,7 +80,7 @@ export KUBE_EDITOR="code -w"
 export GOPATH=/Users/etarn/workspaces/go
 
 ##### AWS #####
-export AWS_PROFILE=dev
+export AWS_PROFILE=default
 export AWS_ACCOUNT_ID=767520670908
 export AWS_DEFAULT_REGION=us-west-2
 export AWS_PAGER=
