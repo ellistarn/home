@@ -23,13 +23,13 @@
 
 [url "ssh://git@github.com/"]
 	insteadOf = https://github.com/
-[gitsign]
-        connectorID = https://accounts.google.com
-[commit]
-	gpgsign = true
-[tag]
-	gpgsign = true
-[gpg "x509"]
-	program = gitsign
-[gpg]
-	format = x509
+#[commit]
+#	gpgsign = true
+#[tag]
+#	gpgsign = true
+#[gpg]
+#	format = x509
+#[gpg "x509"]
+#	program = gitsign
+#[gitsign]
+#        connectorID = https://accounts.google.com
