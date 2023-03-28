@@ -14,7 +14,7 @@ source ~/.p10k.zsh
 ##### Paths #####
 PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
 path+=/usr/local/go/bin
-path+=($HOME/workspaces/go/bin)
+path+=($HOME/go/bin)
 path+=($HOME/.cargo/bin)
 path+=($HOME/bin)
 
@@ -80,7 +80,7 @@ export GITHUB_USER=ellistarn
 export CLOUD_PROVIDER="aws"
 export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/dev"
 export KUBE_EDITOR="code -w"
-export GOPATH=/Users/etarn/workspaces/go
+#export GOPATH=/Users/etarn/workspaces/go
 
 ##### AWS #####
 export AWS_PROFILE=default
