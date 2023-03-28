@@ -13,7 +13,9 @@ source ~/.p10k.zsh
 
 ##### Paths #####
 PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
+path+=/usr/local/go/bin
 path+=($HOME/workspaces/go/bin)
+path+=($HOME/.cargo/bin)
 path+=($HOME/bin)
 
 ##### Aliases #####
@@ -76,7 +78,7 @@ export GITHUB_USER=ellistarn
 
 ##### Kubernetes #####
 export CLOUD_PROVIDER="aws"
-export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/karpenter"
+export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/dev"
 export KUBE_EDITOR="code -w"
 export GOPATH=/Users/etarn/workspaces/go
 
@@ -87,6 +89,11 @@ export AWS_DEFAULT_REGION=us-west-2
 export AWS_PAGER=
 export AWS_DEFAULT_OUTPUT=json
 export AWS_SDK_LOAD_CONFIG=true
+
+function ssmnode() {
+  aws ssm start-session --target $(k get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/')
+}
+
 function aws_account() {
   aws sts get-caller-identity | jq -r ".Account"
 }
