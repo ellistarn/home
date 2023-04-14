@@ -1,6 +1,7 @@
 [user]
 	name = Ellis Tarn
 	email = ellistarn@gmail.com
+	signingkey = /Users/etarn/.ssh/id_ed25519.pub
 
 [core]
 	pager = less -FMRiX
@@ -23,13 +24,5 @@
 
 [url "ssh://git@github.com/"]
 	insteadOf = https://github.com/
-#[commit]
-#	gpgsign = true
-#[tag]
-#	gpgsign = true
-#[gpg]
-#	format = x509
-#[gpg "x509"]
-#	program = gitsign
-#[gitsign]
-#        connectorID = https://accounts.google.com
+[gpg]
+	format = ssh
