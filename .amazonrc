@@ -58,6 +58,6 @@ alias ssh-dev-exit="ssh -O exit $DEV_DESKTOP_HOST"
 
 # Authentication Setup
 MIDWAY_TIMEOUT_SECONDS=43200 # 12 hours
-if ! test $(find ~/.ssh/id_rsa-cert.pub -mtime -${MIDWAY_TIMEOUT_SECONDS}s); then
+if ! test $(find ~/.ssh/id_ecdsa-cert.pub -mtime -${MIDWAY_TIMEOUT_SECONDS}s); then
   mwinit --aea -s
 fi
