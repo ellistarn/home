@@ -52,7 +52,7 @@ zstyle ':completion:*' completer _expand _complete _files _correct _approximate 
 autoload -Uz compinit && compinit
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 source <(kubectl completion zsh)
-[[ -r "/usr/local/aws-cli/aws_completer" ]] && complete -C "/usr/local/aws-cli/aws_completer" aws 
+[[ -r "/usr/local/bin/aws_completer" ]] && complete -C "/usr/local/bin/aws_completer" aws 
 [[ -r "/apollo/env/AmazonAwsCli/bin/aws_completer" ]] && complete -C "/apollo/env/AmazonAwsCli/bin/aws_completer" aws 
 
 ##### Keybindings #####
