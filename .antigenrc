@@ -13,9 +13,8 @@ antigen bundles <<BUNDLES
     git
     lein
     safe-paste
-
     ael-code/zsh-colored-man-pages
-    jeffreytse/zsh-vi-mode
+    
     zsh-users/zsh-autosuggestions
     zsh-users/zsh-completions
     zsh-users/zsh-history-substring-search

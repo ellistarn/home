@@ -27,6 +27,8 @@ done
 EDITOR="code -w"
 
 ##### ZSH Settings #####
+echo '\e[5 q' # Use a vertical line for cursor
+
 HYPHEN_INSENSITIVE="true"
 ENABLE_CORRECTION="true"
 HISTFILE=${ZDOTDIR:-$HOME}/.zsh_history
@@ -54,23 +56,6 @@ autoload -Uz compinit && compinit
 source <(kubectl completion zsh)
 [[ -r "/usr/local/bin/aws_completer" ]] && complete -C "/usr/local/bin/aws_completer" aws 
 [[ -r "/apollo/env/AmazonAwsCli/bin/aws_completer" ]] && complete -C "/apollo/env/AmazonAwsCli/bin/aws_completer" aws 
-
-##### Keybindings #####
-# https://github.com/jeffreytse/zsh-vi-mode#execute-extra-commands
-function zvm_after_init() {
-  bindkey '\e\e[C' forward-word
-  bindkey '\e\e[D' backward-word
-  bindkey '\e\e[D' backward-word
-  bindkey '^[[A' history-substring-search-up
-}
-function zvm_after_lazy_keybindings() {
-  bindkey -M vicmd '\e\e[C' forward-word
-  bindkey -M vicmd '\e\e[D' backward-word
-  bindkey -M vicmd '\e\e[D' backward-word
-  bindkey -M vicmd '^[[A' history-substring-search-up
-  bindkey -M vicmd '^[[B' history-substring-search-down
-  bindkey -M vicmd 'k' history-substring-search-up
-}
 
 ##### Github #####
 export GITHUB_USER=ellistarn
