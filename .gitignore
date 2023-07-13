@@ -19,6 +19,7 @@
 !.p10k.zsh
 !.antigen.zsh
 !.antigenrc
+!.tmux.conf
 !.*rc
 !*.aliases
 !bin/**/*
