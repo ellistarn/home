@@ -1,0 +1,23 @@
+#!/bin/bash
+set -euo pipefail
+account_id=$1
+role=$2
+port=$3
+profile=$4
+
+in_use=$(lsof -i:${port} || :)
+if [[ -z $in_use ]]; then
+  ada credentials serve --account ${account_id} --role ${role} --port ${port} --profile ${profile} &> /dev/null &
+fi
+while true; do
+    if curl -s http://127.0.0.1:${port} &> /dev/null; then
+        creds=$(curl -s http://127.0.0.1:$port)
+        access_key_id=$(echo $creds | jq -r .AccessKeyId)
+        secret_access_key=$(echo $creds | jq -r .SecretAccessKey)
+        session_token=$(echo $creds | jq -r .Token)
+        expiration=$(echo $creds | jq -r .Expiration)
+        echo "{\"Version\":1,\"AccessKeyId\":\"${access_key_id}\",\"SecretAccessKey\":\"${secret_access_key}\",\"SessionToken\":\"${session_token}\",\"Expiration\":\"${expiration}\"}"
+        exit 0
+    fi
+    sleep 1
+done
