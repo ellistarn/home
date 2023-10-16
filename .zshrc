@@ -20,6 +20,7 @@ path+=/usr/local/go/bin
 path+=($HOME/go/bin)
 path+=($HOME/.cargo/bin)
 path+=($HOME/bin)
+path+=(/opt/homebrew/bin)
 
 ##### Aliases #####
 for file in $(ls -a $HOME | grep \.aliases | sort); do
