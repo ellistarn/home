@@ -54,5 +54,5 @@ fi
 # Authentication Setup
 MIDWAY_TIMEOUT_SECONDS=43200 # 12 hours
 if ! test $(find ~/.ssh/id_ecdsa-cert.pub -mtime -${MIDWAY_TIMEOUT_SECONDS}s); then
-  mwinit --aea -s
+  mwinit -s
 fi

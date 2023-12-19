@@ -8,13 +8,6 @@ antigen use oh-my-zsh
 
 antigen bundles <<BUNDLES
     b4b4r07/enhancd
-    colorize
-    command-not-found
-    git
-    lein
-    safe-paste
-    ael-code/zsh-colored-man-pages
-    
     zsh-users/zsh-autosuggestions
     zsh-users/zsh-completions
     zsh-users/zsh-history-substring-search

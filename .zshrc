@@ -63,13 +63,11 @@ source <(kubectl completion zsh)
 
 ##### Github #####
 export GITHUB_USER=ellistarn
-# export GITHUB_TOKEN=$(cat $HOME/.git/token)
 
 ##### Kubernetes #####
 export CLOUD_PROVIDER="aws"
 export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/dev"
 export KUBE_EDITOR="code -w"
-#export GOPATH=/Users/etarn/workspaces/go
 
 ##### AWS #####
 export AWS_PROFILE=default
@@ -79,8 +77,16 @@ export AWS_PAGER=
 export AWS_DEFAULT_OUTPUT=json
 export AWS_SDK_LOAD_CONFIG=true
 
+function instanceid() {
+  kubectl get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/'
+}
+
 function ssmnode() {
-  aws ssm start-session --target $(k get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/')
+  aws ssm start-session --target $(instanceid $1)
+}
+
+function ssmportforward() {
+   aws ssm start-session --target $(instanceid $1) --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["1234"],"localPortNumber":["1234"]}'
 }
 
 function aws_account() {
