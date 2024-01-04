@@ -12,6 +12,9 @@ export SAM_AWS_PARTITION=aws
 export WESLEY_DEV_STACK_DNS="etarn.us-west-2.dev.holograph.space"
 export WESLEY_DEV_FRONTEND_API_GATEWAY_URL=https://z15tesp5re.execute-api.us-west-2.amazonaws.com/Stage/
 
+export AWS_DEV_1=767520670908
+export AWS_DEV_2=454269956186
+
 scp_dev() {
   scp -r $DEV_DESKTOP_HOST:$@
 }
