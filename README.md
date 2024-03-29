@@ -1,7 +1,7 @@
 # Overview
-This is ellistarn's home directory
+This is haouc's home directory
 
 # Install
 ```
-sh -c "$(wget https://raw.githubusercontent.com/ellistarn/home/main/bin/install-home.sh -O -)"
+sh -c "$(wget https://raw.githubusercontent.com/haouc/home/main/bin/install-home.sh -O -)"
 ```
