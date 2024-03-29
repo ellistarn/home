@@ -1,12 +1,12 @@
 [user]
-	name = Ellis Tarn
-	email = ellistarn@gmail.com
-	signingkey = /Users/etarn/.ssh/id_ed25519.pub
+	name = Hao Zhou
+	email = hzhoucs@gmail.com
+	signingkey = /Users/zhuhz/.ssh/id_ed25519.pub
 
 [core]
 	pager = less -FMRiX
 	editor = vim
-	excludesfile = /Users/etarn/.gitignore.global
+	excludesfile = /Users/zhuhz/.gitignore.global
 
 [push]
 	default = simple
