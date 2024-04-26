@@ -1,6 +1,5 @@
 #!/bin/zsh
 
-export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-90cd7c8f.us-west-2.amazon.com #etarn.corp.amazon.com
 export BRAZIL_WORKSPACE=workspaces/brazil
 export WS=$HOME/workspaces/brazil
 
@@ -9,7 +8,6 @@ export SAM_ISENGARD_ROLE_NAME=Admin
 export SAM_REGION=us-west-2
 export SAM_AWS_PARTITION=aws
 
-export WESLEY_DEV_STACK_DNS="etarn.us-west-2.dev.holograph.space"
 export WESLEY_DEV_FRONTEND_API_GATEWAY_URL=https://z15tesp5re.execute-api.us-west-2.amazonaws.com/Stage/
 
 export AWS_DEV_1=767520670908

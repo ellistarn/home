@@ -62,20 +62,22 @@ autoload -Uz compinit && compinit
 source <(kubectl completion zsh)
 
 ##### Github #####
-export GITHUB_USER=ellistarn
+export GITHUB_USER=haouc
 
 ##### Kubernetes #####
 export CLOUD_PROVIDER="aws"
-export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/dev"
+export KO_DOCKER_REPO="744053100597.dkr.ecr.us-west-2.amazonaws.com/dev"
 export KUBE_EDITOR="code -w"
 
 ##### AWS #####
 export AWS_PROFILE=default
-export AWS_ACCOUNT_ID=767520670908
+export AWS_ACCOUNT_ID=744053100597
 export AWS_DEFAULT_REGION=us-west-2
 export AWS_PAGER=
 export AWS_DEFAULT_OUTPUT=json
 export AWS_SDK_LOAD_CONFIG=true
+export BETA_ENDPOINT=https://api.beta.us-west-2.wesley.amazonaws.com
+
 
 function instanceid() {
   kubectl get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/'
