@@ -67,7 +67,7 @@ export GITHUB_USER=ellistarn
 ##### Kubernetes #####
 export CLOUD_PROVIDER="aws"
 export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/dev"
-export KOCACHE="~/.ko"
+export KOCACHE="$HOME/.ko"
 export KUBE_EDITOR="code -w"
 export KUBECONFIG=./.kube/config:~/.kube/config
 
