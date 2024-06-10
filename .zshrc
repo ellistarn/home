@@ -97,3 +97,7 @@ function aws_account() {
 function ecr_login() {
   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
 }
+# if you wish to use IMDS set AWS_EC2_METADATA_DISABLED=false
+
+export AWS_EC2_METADATA_DISABLED=true
+

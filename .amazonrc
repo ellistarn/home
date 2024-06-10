@@ -36,7 +36,7 @@ alias brp="yes | brazil ws --remove --package"
 alias bws="brazil ws --sync --metadata"
 alias bba="brazil-recursive-cmd brazil-build --allPackages"
 alias sam="brazil-build-tool-exec sam"
-alias deveks="aws eks --endpoint $WESLEY_DEV_FRONTEND_API_GATEWAY_URL"
+# alias deveks="aws eks --endpoint $WESLEY_DEV_FRONTEND_API_GATEWAY_URL"
 
 export PATH=/apollo/env/envImprovement/bin:$PATH
 export PATH=/apollo/env/AmazonAwsCli/bin/:$PATH
