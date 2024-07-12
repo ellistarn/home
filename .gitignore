@@ -17,7 +17,7 @@
 # Include shell
 !.zshrc
 !.p10k.zsh
-!.antigen.zsh
+!antigen.zsh
 !.antigenrc
 !.tmux.conf
 !.*rc

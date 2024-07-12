@@ -1,5 +1,5 @@
 ##### Antigen #####
-source $HOME/.antigen.zsh
+source $HOME/antigen.zsh
 antigen init $HOME/.antigenrc
 
 ##### Powerlevel10k #####
@@ -97,3 +97,4 @@ function aws_account() {
 function ecr_login() {
   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
 }
+
