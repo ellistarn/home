@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-90cd7c8f.us-west-2.amazon.com #etarn.corp.amazon.com
+export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-1cd22a6f.us-west-2.amazon.com
 export BRAZIL_WORKSPACE=workspaces/brazil
 export WS=$HOME/workspaces/brazil
 
