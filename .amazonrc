@@ -2,7 +2,7 @@
 
 export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-1cd22a6f.us-west-2.amazon.com
 export BRAZIL_WORKSPACE=workspaces/brazil
-export WS=$HOME/workspaces/brazil
+export WS=$HOME/workspaces
 
 export SAM_ACCOUNT=$AWS_ACCOUNT_ID
 export SAM_ISENGARD_ROLE_NAME=Admin
