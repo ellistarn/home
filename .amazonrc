@@ -9,9 +9,6 @@ export SAM_ISENGARD_ROLE_NAME=Admin
 export SAM_REGION=us-west-2
 export SAM_AWS_PARTITION=aws
 
-export WESLEY_DEV_STACK_DNS="etarn.us-west-2.dev.holograph.space"
-export WESLEY_DEV_FRONTEND_API_GATEWAY_URL=https://z15tesp5re.execute-api.us-west-2.amazonaws.com/Stage/
-
 export AWS_DEV_1=767520670908
 export AWS_DEV_2=454269956186
 
@@ -41,12 +38,8 @@ alias sam="brazil-build-tool-exec sam"
 alias deveks="aws eks --endpoint $WESLEY_DEV_FRONTEND_API_GATEWAY_URL"
 
 export PATH=/apollo/env/envImprovement/bin:$PATH
-export PATH=/apollo/env/AmazonAwsCli/bin/:$PATH
 export PATH=/apollo/env/SDETools/bin:$PATH
 export PATH=$HOME/.toolbox/bin:$PATH
-export PATH=$HOME/workspaces/brazil/EKSAdm/src/EksAdm/build/bin:$PATH
-export PATH=$HOME/workspaces/brazil/GoAmzn-EKSOpsTooling/src/GoAmzn-EKSOpsTooling/build/bin:$PATH
-export PATH=$HOME/workspaces/brazil/EKSDataPlaneAutoScalingService/src/EKSDataPlaneAutoScalingService/build/bin:$PATH
 
 export AUTH_HOST=$DEV_DESKTOP_HOST
 
@@ -55,7 +48,7 @@ if [[ $(uname) != 'Darwin' ]]; then
 fi
 
 # Authentication Setup
-MIDWAY_TIMEOUT_SECONDS=43200 # 12 hours
+MIDWAY_TIMEOUT_SECONDS=57600 # 16 hours
 if ! test $(find ~/.ssh/id_ecdsa-cert.pub -mtime -${MIDWAY_TIMEOUT_SECONDS}s); then
-  mwinit -s
+  mwinit -f
 fi
