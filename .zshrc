@@ -1,6 +1,19 @@
-##### Antigen #####
+##### Zsh #####
 source $HOME/antigen.zsh
-antigen init $HOME/.antigenrc
+# Awesome Zsh Plugins: https://github.com/unixorn/awesome-zsh-plugins
+# Antigen: https://github.com/zsh-users/antigen
+# Oh My Zsh: https://github.com/ohmyzsh/ohmyzsh
+antigen use oh-my-zsh
+antigen theme romkatv/powerlevel10k
+
+antigen bundles <<BUNDLES
+    zsh-users/zsh-autosuggestions
+    zsh-users/zsh-completions
+    zsh-users/zsh-history-substring-search
+    zsh-users/zsh-syntax-highlighting
+BUNDLES
+
+antigen apply
 
 ##### Powerlevel10k #####
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -9,10 +22,7 @@ antigen init $HOME/.antigenrc
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-source ~/.p10k.zsh
-
-##### Amazon #####
-source $HOME/.amazonrc
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 ##### Paths #####
 PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
@@ -57,27 +67,16 @@ zstyle ':completion:*' completer _expand _complete _files _correct _approximate 
 
 autoload -Uz compinit && compinit
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
-[[ -r "/usr/local/bin/aws_completer" ]] && complete -C "/usr/local/bin/aws_completer" aws 
-[[ -r "/apollo/env/AmazonAwsCli/bin/aws_completer" ]] && complete -C "/apollo/env/AmazonAwsCli/bin/aws_completer" aws 
+[[ -r "/usr/local/bin/aws_completer" ]] && complete -C "/usr/local/bin/aws_completer" aws
 source <(kubectl completion zsh)
 
 ##### Github #####
 export GITHUB_USER=ellistarn
 
 ##### Kubernetes #####
-export CLOUD_PROVIDER="aws"
-export KO_DOCKER_REPO="767520670908.dkr.ecr.us-west-2.amazonaws.com/dev"
 export KOCACHE="$HOME/.ko"
 export KUBE_EDITOR="code -w"
 export KUBECONFIG=./.kube/config:~/.kube/config
-
-##### AWS #####
-export AWS_PROFILE=default
-export AWS_ACCOUNT_ID=767520670908
-export AWS_DEFAULT_REGION=us-west-2
-export AWS_PAGER=
-export AWS_DEFAULT_OUTPUT=json
-export AWS_SDK_LOAD_CONFIG=true
 
 function instanceid() {
   kubectl get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/'
@@ -97,4 +96,3 @@ function aws_account() {
 function ecr_login() {
   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
 }
-
