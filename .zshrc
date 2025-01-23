@@ -25,12 +25,30 @@ fi
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 ##### Paths #####
-PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
+path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
 path+=/usr/local/go/bin
+path+=/opt/anaconda3/bin
 path+=($HOME/go/bin)
 path+=($HOME/.cargo/bin)
 path+=($HOME/bin)
 path+=(/opt/homebrew/bin)
+
+##### Scripts #####
+for dir in $(find "$HOME/bin" -type d); do
+  path+=$dir
+done
+
+##### Environment #####
+# Github
+export GITHUB_USER=ellistarn
+# Ghostty
+export TERM=xterm-256color
+# Kubernetes
+export KOCACHE="$HOME/.ko"
+export KUBE_EDITOR="code -w"
+export KUBECONFIG=./.kube/config:~/.kube/config
+# Meta
+export DEV_DESKTOP_HOST=devbig781.ftw5.facebook.com
 
 ##### Aliases #####
 for file in $(ls -a $HOME | grep \.aliases | sort); do
@@ -70,14 +88,6 @@ autoload -Uz compinit && compinit
 [[ -r "/usr/local/bin/aws_completer" ]] && complete -C "/usr/local/bin/aws_completer" aws
 source <(kubectl completion zsh)
 
-##### Github #####
-export GITHUB_USER=ellistarn
-
-##### Kubernetes #####
-export KOCACHE="$HOME/.ko"
-export KUBE_EDITOR="code -w"
-export KUBECONFIG=./.kube/config:~/.kube/config
-
 function instanceid() {
   kubectl get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/'
 }
@@ -96,3 +106,19 @@ function aws_account() {
 function ecr_login() {
   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
 }
+
+return
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/opt/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
