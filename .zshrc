@@ -48,7 +48,7 @@ export TERM=xterm-256color
 # Kubernetes
 export KOCACHE="$HOME/.ko"
 export KUBE_EDITOR="code -w"
-export KUBECONFIG=./.kube/config:~/.kube/config
+#export KUBECONFIG=./.kube/config:~/.kube/config
 # Meta
 export DEV_DESKTOP_HOST=devbig781.ftw5.facebook.com
 
@@ -115,9 +115,6 @@ function ssmportforward() {
    aws ssm start-session --target $(instanceid $1) --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["1234"],"localPortNumber":["1234"]}'
 }
 
-function aws_account() {
-  aws sts get-caller-identity | jq -r ".Account"
-}
 function ecr_login() {
   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
 }
@@ -126,9 +123,10 @@ function aws_login() {
   ROLE=${2:-Admin}
   open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
 }
-
-function test2() {
-  echo foo
+function aws_login() {
+  ACCOUNT=${1:-$(aws_account)}
+  ROLE=${2:-SSOAdmin}
+  open "https://www.internalfb.com/intern/cloud/aws/sso/?role=${ROLE}&account_id=${ACCOUNT}"
 }
 
 # >>> conda initialize >>>

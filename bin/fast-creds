@@ -1,0 +1,40 @@
+#!/bin/bash
+
+TIMEOUT=3600 # (1 hour)
+CACHE_FILE="/tmp/aws_credentials"
+
+get_cached_credentials() {
+    if [ ! -f "$CACHE_FILE" ]; then
+        return 1
+    fi
+    MODIFIED_TIME=$(stat -f %m "$CACHE_FILE")
+    CURRENT_TIME=$(date +%s)
+    AGE=$((CURRENT_TIME - MODIFIED_TIME))
+    if [ $AGE -gt $TIMEOUT ]; then
+        return 1
+    fi
+    cat "${CACHE_FILE}"
+    return 0
+}
+
+get_credentials() {
+    cloud_corp aws get-creds "$1" --role "$2" --output cli > ${CACHE_FILE}
+    if [ $? -eq 0 ]; then
+        cat ${CACHE_FILE}
+        return 0
+    fi
+    return 1
+}
+
+main() {    
+    get_cached_credentials # Try to get cached credentials first
+    if [ $? -ne 0 ]; then # If cache miss or expired, get fresh credentials
+        get_credentials "$1" "$2"
+        if [ $? -ne 0 ]; then
+            echo "Failed to get credentials" >&2
+            exit 1
+        fi
+    fi
+}
+
+main "$@"

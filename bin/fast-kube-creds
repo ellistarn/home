@@ -1,0 +1,41 @@
+#!/bin/bash
+
+TIMEOUT=900 # (15 minutes - default k8s token expiration)
+CACHE_FILE="/tmp/k8s_token"
+
+get_cached_token() {
+    if [ ! -f "$CACHE_FILE" ]; then
+        return 1
+    fi
+    MODIFIED_TIME=$(stat -f %m "$CACHE_FILE")
+    CURRENT_TIME=$(date +%s)
+    AGE=$((CURRENT_TIME - MODIFIED_TIME))
+    if [ $AGE -gt $TIMEOUT ]; then
+        return 1
+    fi
+    cat "${CACHE_FILE}"
+    return 0
+}
+
+get_token() {
+    aws eks get-token --cluster-name "$1" > ${CACHE_FILE}
+    if [ $? -eq 0 ]; then
+        cat ${CACHE_FILE}
+        return 0
+    fi
+    return 1
+}
+
+
+main() {    
+    get_cached_token 
+    if [ $? -ne 0 ]; then
+        get_token "$1"
+        if [ $? -ne 0 ]; then
+            echo "Failed to get token" >&2
+            exit 1
+        fi
+    fi
+}
+
+main "$@"
