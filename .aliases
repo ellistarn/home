@@ -1,3 +1,4 @@
+alias terraform='tofu'
 alias watch="viddy "
 alias kdebug='kubectl run -l debug=$USER -it --image ellistarn/debug $USER-debug-$RANDOM'
 alias kdebugcleanup='kubectl get pods -l debug=$USER --no-headers=true | cut -f1 -d " " | xargs kubectl delete pods'
