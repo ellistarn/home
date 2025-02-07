@@ -24,3 +24,5 @@
 !.*rc
 !*.aliases
 !bin/**/*
+!bin
+bin/.*

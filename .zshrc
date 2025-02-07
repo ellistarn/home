@@ -25,12 +25,12 @@ fi
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 ##### Paths #####
+path+=($HOME/bin)
 path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
 path+=/usr/local/go/bin
 path+=/opt/anaconda3/bin
 path+=($HOME/go/bin)
 path+=($HOME/.cargo/bin)
-path+=($HOME/bin)
 path+=(/opt/homebrew/bin)
 
 ##### Scripts #####
@@ -125,6 +125,10 @@ function aws_login() {
   ACCOUNT=${1:-$AWS_ACCOUNT_ID}
   ROLE=${2:-Admin}
   open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
+}
+
+function test2() {
+  echo foo
 }
 
 # >>> conda initialize >>>
