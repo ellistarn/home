@@ -1,6 +1,7 @@
 #!/bin/bash
+set -u
 
-TIMEOUT=3600 # (1 hour)
+TIMEOUT=900 # (15m, 1 hour is the expiry)
 CACHE_FILE="/tmp/aws_credentials"
 
 get_cached_credentials() {
@@ -11,6 +12,7 @@ get_cached_credentials() {
     CURRENT_TIME=$(date +%s)
     AGE=$((CURRENT_TIME - MODIFIED_TIME))
     if [ $AGE -gt $TIMEOUT ]; then
+        rm "$CACHE_FILE"
         return 1
     fi
     cat "${CACHE_FILE}"
@@ -18,11 +20,13 @@ get_cached_credentials() {
 }
 
 get_credentials() {
-    cloud_corp aws get-creds "$1" --role "$2" --output cli > ${CACHE_FILE}
+    CREDENTIALS=$(cloud_corp aws get-creds "$1" --role "$2" --output cli)
     if [ $? -eq 0 ]; then
-        cat ${CACHE_FILE}
+        echo ${CREDENTIALS}
+        echo ${CREDENTIALS} > ${CACHE_FILE}
         return 0
     fi
+    echo ${CREDENTIALS}
     return 1
 }
 
@@ -36,5 +40,5 @@ main() {
         fi
     fi
 }
-
 main "$@"
+

@@ -26,12 +26,13 @@ fi
 
 ##### Paths #####
 path+=($HOME/bin)
+path+=(/opt/homebrew/bin)
 path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
 path+=/usr/local/go/bin
 path+=/opt/anaconda3/bin
 path+=($HOME/go/bin)
 path+=($HOME/.cargo/bin)
-path+=(/opt/homebrew/bin)
+path+=($HOME/.bun/bin)
 
 ##### Scripts #####
 for dir in $(find "$HOME/bin" -type d); do
