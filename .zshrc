@@ -1,4 +1,3 @@
-##### Zsh #####
 source $HOME/antigen.zsh
 # Awesome Zsh Plugins: https://github.com/unixorn/awesome-zsh-plugins
 # Antigen: https://github.com/zsh-users/antigen
@@ -24,12 +23,15 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# Amazon Q pre block. Keep at the top of this file.
+[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
+##### Zsh #####
+
 ##### Paths #####
 path+=($HOME/bin)
 path+=(/opt/homebrew/bin)
 path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
 path+=/usr/local/go/bin
-path+=/opt/anaconda3/bin
 path+=($HOME/go/bin)
 path+=($HOME/.cargo/bin)
 path+=($HOME/.bun/bin)
@@ -130,17 +132,5 @@ function aws_login() {
   open "https://www.internalfb.com/intern/cloud/aws/sso/?role=${ROLE}&account_id=${ACCOUNT}"
 }
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/opt/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/opt/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
+# Amazon Q post block. Keep at the bottom of this file.
+[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
