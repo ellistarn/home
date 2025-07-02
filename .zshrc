@@ -1,5 +1,3 @@
-# Amazon Q pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
 source $HOME/antigen.zsh
 # Awesome Zsh Plugins: https://github.com/unixorn/awesome-zsh-plugins
 # Antigen: https://github.com/zsh-users/antigen
@@ -7,9 +5,10 @@ source $HOME/antigen.zsh
 antigen use oh-my-zsh
 antigen theme romkatv/powerlevel10k
 
-# zsh-users/zsh-autosuggestions
-# zsh-users/zsh-completions
+
 antigen bundles <<BUNDLES
+    zsh-users/zsh-autosuggestions
+    zsh-users/zsh-completions
     zsh-users/zsh-history-substring-search
     zsh-users/zsh-syntax-highlighting
 BUNDLES
@@ -69,6 +68,7 @@ export AWS_SDK_LOAD_CONFIG=true
 ##### Amazon #####
 path+=($HOME/.toolbox/bin)
 export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-45df6bed.us-west-2.amazon.com
+~/bin/login.sh
 
 ##### Aliases #####
 for file in $(ls -a $HOME | grep \.aliases | sort); do
@@ -133,9 +133,3 @@ function aws_login() {
   ROLE=${2:-SSOAdmin}
   open "https://www.internalfb.com/intern/cloud/aws/sso/?role=${ROLE}&account_id=${ACCOUNT}"
 }
-
-# Amazon Q post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
-
-# Kiro block
-[[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
