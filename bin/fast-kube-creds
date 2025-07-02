@@ -1,44 +1,37 @@
 #!/bin/bash
 set -u
-TIMEOUT=600 # (10 minutes, 15 minutes is the default k8s token expiration)
-CACHE_FILE="/tmp/k8s_token"
 
-get_cached_token() {
-    if [ ! -f "$CACHE_FILE" ]; then
-        return 1
+TIMEOUT=600
+CACHE_FILE="/tmp/k8s_token_$(echo "$*" | md5)"
+
+# Clean up expired cache files
+for cache in /tmp/k8s_token_*; do
+    [[ -f "$cache" ]] || continue
+    AGE=$(($(date +%s) - $(stat -f %m "$cache")))
+    [[ $AGE -gt $TIMEOUT ]] && rm "$cache"
+done
+
+# Add current cluster if no cluster specified
+args=("$@")
+if [[ "$*" != *"--cluster"* ]]; then
+    CLUSTER=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' 2>/dev/null || true)
+    [[ -n "$CLUSTER" ]] && args=(--cluster-name "$CLUSTER" "$@")
+fi
+
+# Check cache
+if [[ -f "$CACHE_FILE" ]]; then
+    AGE=$(($(date +%s) - $(stat -f %m "$CACHE_FILE")))
+    if [[ $AGE -le $TIMEOUT ]]; then
+        cat "$CACHE_FILE"
+        exit 0
     fi
-    MODIFIED_TIME=$(stat -f %m "$CACHE_FILE")
-    CURRENT_TIME=$(date +%s)
-    AGE=$((CURRENT_TIME - MODIFIED_TIME))
-    if [ $AGE -gt $TIMEOUT ]; then
-        rm "$CACHE_FILE"
-        return 1
-    fi
-    cat "${CACHE_FILE}"
-    return 0
-}
+fi
 
-get_token() {
-    TOKEN=$(aws eks get-token --cluster-name "$1")
-    if [ $? -eq 0 ]; then
-        echo "$TOKEN"
-        echo "$TOKEN" > ${CACHE_FILE}
-        return 0
-    fi
-    echo $TOKEN
-    return 1
-}
-
-
-main() {    
-    get_cached_token 
-    if [ $? -ne 0 ]; then
-        get_token "$1"
-        if [ $? -ne 0 ]; then
-            echo "Failed to get token" >&2
-            exit 1
-        fi
-    fi
-}
-
-main "$@"
+# Get fresh token
+TOKEN=$(aws eks get-token "${args[@]}")
+if [[ $? -eq 0 ]]; then
+    echo "$TOKEN" | tee "$CACHE_FILE"
+else
+    echo "$TOKEN" >&2
+    exit 1
+fi

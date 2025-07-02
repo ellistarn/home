@@ -1,44 +1,37 @@
 #!/bin/bash
 set -u
 
-TIMEOUT=900 # (15m, 1 hour is the expiry)
-CACHE_FILE="/tmp/aws_credentials"
+TIMEOUT=900
+CACHE_FILE="/tmp/aws_credentials_$(echo "$*" | md5)"
 
-get_cached_credentials() {
-    if [ ! -f "$CACHE_FILE" ]; then
-        return 1
-    fi
-    MODIFIED_TIME=$(stat -f %m "$CACHE_FILE")
-    CURRENT_TIME=$(date +%s)
-    AGE=$((CURRENT_TIME - MODIFIED_TIME))
-    if [ $AGE -gt $TIMEOUT ]; then
-        rm "$CACHE_FILE"
-        return 1
-    fi
-    cat "${CACHE_FILE}"
-    return 0
-}
+# Clean up expired cache files
+for cache in /tmp/aws_credentials_*; do
+    [[ -f "$cache" ]] || continue
+    AGE=$(($(date +%s) - $(stat -f %m "$cache")))
+    [[ $AGE -gt $TIMEOUT ]] && rm "$cache"
+done
 
-get_credentials() {
-    CREDENTIALS=$(cloud_corp aws get-creds "$1" --role "$2" --output cli)
-    if [ $? -eq 0 ]; then
-        echo ${CREDENTIALS}
-        echo ${CREDENTIALS} > ${CACHE_FILE}
-        return 0
-    fi
-    echo ${CREDENTIALS}
-    return 1
-}
+# Add defaults if not already provided
+args=()
+[[ "$*" != *"--account"* && -n "${AWS_ACCOUNT_ID:-}" ]] && args+=(--account "$AWS_ACCOUNT_ID")
+[[ "$*" != *"--role"* ]] && args+=(--role "${AWS_ACCOUNT_ROLE:-Admin}")
+args+=("$@")
 
-main() {    
-    get_cached_credentials # Try to get cached credentials first
-    if [ $? -ne 0 ]; then # If cache miss or expired, get fresh credentials
-        get_credentials "$1" "$2"
-        if [ $? -ne 0 ]; then
-            echo "Failed to get credentials" >&2
-            exit 1
-        fi
+# Check cache
+if [[ -f "$CACHE_FILE" ]]; then
+    AGE=$(($(date +%s) - $(stat -f %m "$CACHE_FILE")))
+    if [[ $AGE -le $TIMEOUT ]]; then
+        cat "$CACHE_FILE"
+        exit 0
     fi
-}
-main "$@"
+fi
+
+# Get fresh credentials
+CREDENTIALS=$(ada credentials print "${args[@]}")
+if [[ $? -eq 0 ]]; then
+    echo "$CREDENTIALS" | tee "$CACHE_FILE"
+else
+    echo "$CREDENTIALS" >&2
+    exit 1
+fi
 

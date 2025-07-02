@@ -68,6 +68,7 @@ export AWS_SDK_LOAD_CONFIG=true
 
 ##### Amazon #####
 path+=($HOME/.toolbox/bin)
+export AWS_ACCOUNT_ID=767520670908
 export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-45df6bed.us-west-2.amazon.com
 ~/bin/login.sh
 
@@ -124,13 +125,9 @@ function ssmportforward() {
 function ecr_login() {
   aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(aws_account).dkr.ecr.us-west-2.amazonaws.com
 }
+
 function aws_login() {
   ACCOUNT=${1:-$AWS_ACCOUNT_ID}
   ROLE=${2:-Admin}
   open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
-}
-function aws_login() {
-  ACCOUNT=${1:-$(aws_account)}
-  ROLE=${2:-SSOAdmin}
-  open "https://www.internalfb.com/intern/cloud/aws/sso/?role=${ROLE}&account_id=${ACCOUNT}"
 }
