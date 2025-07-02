@@ -4,11 +4,6 @@
 # Include README
 !README.md
 
-# Include Brew
-!Brewfile
-
-# Include bin
-
 # Include git
 !.gitignore
 !.gitignore.global
@@ -26,6 +21,11 @@
 !bin/**/*
 !bin
 bin/.*
+
+# Include AWS
+!.aws
+!.aws/amazonq
+!.aws/amazonq/global_context.json
 
 # Explicitly ignore
 .bashrc

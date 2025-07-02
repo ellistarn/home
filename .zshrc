@@ -28,6 +28,7 @@ fi
 
 ##### Paths #####
 path+=($HOME/bin)
+path+=($HOME/.local/bin)
 path+=(/opt/homebrew/bin)
 path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
 path+=/usr/local/go/bin
