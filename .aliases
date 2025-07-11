@@ -1,3 +1,4 @@
+alias docker="finch"
 alias terraform='tofu'
 alias watch="viddy "
 alias kdebug='kubectl run -l debug=$USER -it --image ellistarn/debug $USER-debug-$RANDOM'

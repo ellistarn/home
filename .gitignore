@@ -24,6 +24,7 @@ bin/.*
 
 # Include AWS
 !.aws
+!.aws/config
 !.aws/amazonq
 !.aws/amazonq/global_context.json
 
