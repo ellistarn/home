@@ -2,12 +2,22 @@
 set -u
 
 TIMEOUT=900
-CACHE_FILE="/tmp/aws_credentials_$(echo "$*" | md5)"
+
+# Cross-platform file modification time
+get_mtime() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        stat -f %m "$1"
+    else
+        stat -c %Y "$1"
+    fi
+}
+
+CACHE_FILE="/tmp/aws_credentials_$(echo "$*" | md5sum | cut -d' ' -f1)"
 
 # Clean up expired cache files
 for cache in /tmp/aws_credentials_*; do
     [[ -f "$cache" ]] || continue
-    AGE=$(($(date +%s) - $(stat -f %m "$cache")))
+    AGE=$(($(date +%s) - $(get_mtime "$cache")))
     [[ $AGE -gt $TIMEOUT ]] && rm "$cache"
 done
 
@@ -19,7 +29,7 @@ args+=("$@")
 
 # Check cache
 if [[ -f "$CACHE_FILE" ]]; then
-    AGE=$(($(date +%s) - $(stat -f %m "$CACHE_FILE")))
+    AGE=$(($(date +%s) - $(get_mtime "$CACHE_FILE")))
     if [[ $AGE -le $TIMEOUT ]]; then
         cat "$CACHE_FILE"
         exit 0
