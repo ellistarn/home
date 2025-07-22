@@ -12,6 +12,7 @@ get_mtime() {
     fi
 }
 
+# Original token generation functionality
 CACHE_FILE="/tmp/k8s_token_$(echo "$*" | md5sum | cut -d' ' -f1)"
 
 # Clean up expired cache files
@@ -23,10 +24,17 @@ done
 
 # Add current cluster if no cluster specified
 args=("$@")
-if [[ "$*" != *"--cluster"* ]]; then
-    CLUSTER=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' 2>/dev/null || true)
+if [[ "$*" != *"--cluster-name"* ]]; then
+    CLUSTER=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' 2>/dev/null | sed 's/.*\///' || true)
     [[ -n "$CLUSTER" ]] && args=(--cluster-name "$CLUSTER" "$@")
 fi
+
+# Inject into Kubeconfig
+USER_NAME=$(kubectl config view -o jsonpath="{.contexts[?(@.name==\"$(kubectl config current-context)\")].context.user}")
+kubectl config set-credentials "$USER_NAME" \
+    --exec-api-version=client.authentication.k8s.io/v1beta1 \
+    --exec-command=fast-kube-creds \
+    $(for arg in "${args[@]}"; do echo "--exec-arg=$arg"; done) >/dev/null
 
 # Check cache
 if [[ -f "$CACHE_FILE" ]]; then
