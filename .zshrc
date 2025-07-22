@@ -31,10 +31,11 @@ path+=($HOME/bin)
 path+=($HOME/.local/bin)
 path+=(/opt/homebrew/bin)
 path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
-path+=/usr/local/go/bin
 path+=($HOME/go/bin)
 path+=($HOME/.cargo/bin)
 path+=($HOME/.bun/bin)
+path+=(/usr/local/go/bin)
+path+=(/usr/local/bin)
 
 ##### Scripts #####
 for dir in $(find "$HOME/bin" -type d); do
