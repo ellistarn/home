@@ -43,6 +43,13 @@ for dir in $(find "$HOME/bin" -type d); do
 done
 
 ##### Environment #####
+
+##### Amazon #####
+path+=($HOME/.toolbox/bin)
+export AWS_ACCOUNT_ID=767520670908
+export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-45df6bed.us-west-2.amazon.com
+~/bin/login.sh
+
 # Github
 export GITHUB_USER=ellistarn
 # export GITHUB_TOKEN=$(cat $HOME/.git/token)
@@ -51,6 +58,7 @@ export GITHUB_USER=ellistarn
 export TERM=xterm-256color
 # Kubernetes
 export KOCACHE="$HOME/.ko"
+export KO_DOCKER_REPO=${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/dev
 export KUBE_EDITOR="code -w"
 #export KUBECONFIG=./.kube/config:~/.kube/config
 
@@ -66,12 +74,6 @@ export AWS_DEFAULT_REGION=us-west-2
 export AWS_PAGER=
 export AWS_DEFAULT_OUTPUT=json
 export AWS_SDK_LOAD_CONFIG=true
-
-##### Amazon #####
-path+=($HOME/.toolbox/bin)
-export AWS_ACCOUNT_ID=767520670908
-export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-45df6bed.us-west-2.amazon.com
-~/bin/login.sh
 
 ##### Aliases #####
 for file in $(ls -a $HOME | grep \.aliases | sort); do
