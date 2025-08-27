@@ -60,7 +60,7 @@ export TERM=xterm-256color
 export KOCACHE="$HOME/.ko"
 export KO_DOCKER_REPO=${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/dev
 export KUBE_EDITOR="code -w"
-#export KUBECONFIG=./.kube/config:~/.kube/config
+export KUBECONFIG=./.kube/config:~/.kube/config
 
 ##### Github #####
 export GITHUB_USER=ellistarn
@@ -130,7 +130,7 @@ function ecr_login() {
 }
 
 function aws_login() {
-  ACCOUNT=${1:-$AWS_ACCOUNT_ID}
+  ACCOUNT=${1:-$(aws_account)}
   ROLE=${2:-Admin}
   open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
 }
