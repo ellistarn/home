@@ -1,0 +1,11 @@
+{
+  "autocomplete.onlyShowOnTab": false,
+  "chat.defaultAgent": "dev",
+  "chat.defaultModel": "claude-3.7-sonnet",
+  "chat.enableContextUsageIndicator": true,
+  "inline.enabled": false,
+  "integrations.hyper.disabled": true,
+  "integrations.terminal.disabled": true,
+  "mcp.loadedBefore": true,
+  "chat.enableKnowledge": true
+}

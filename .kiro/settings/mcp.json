@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "builder-mcp": {
+      "command": "/Users/etarn/.toolbox/bin/builder-mcp",
+      "args": [],
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "InternalSearch"
+      ]
+    }
+  }
+}
