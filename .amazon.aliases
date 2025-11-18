@@ -1,5 +1,6 @@
 alias bb=brazil-build
 alias bup="brazil ws use --package"
 alias brp="brazil ws remove --package"
+alias bws="brazil ws --sync --md"
 
 alias journal='/apollo/env/JournalClientCLI/bin/journal'

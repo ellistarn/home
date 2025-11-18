@@ -27,6 +27,8 @@ bin/.*
 !.aws/config
 !.aws/amazonq
 !.aws/amazonq/global_context.json
+!.aws/amazonq/cli-agents
+!.aws/amazonq/cli-agents/*
 
 # Explicitly ignore
 .bashrc
