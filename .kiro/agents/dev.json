@@ -14,10 +14,11 @@
     "file://AmazonQ.md",
     "file://AGENTS.md",
     "file://README.md",
+    "file://.kiro/steering/**",
     "file://.amazonq/rules/**/*.md"
   ],
   "hooks": {},
   "toolsSettings": {},
-  "useLegacyMcpJson": true,
+  "useLegacyMcpJson": false,
   "model": null
 }
