@@ -9,7 +9,9 @@
     "*"
   ],
   "toolAliases": {},
-  "allowedTools": [],
+  "allowedTools": [
+    "shell"
+  ],
   "resources": [
     "file://AmazonQ.md",
     "file://AGENTS.md",
