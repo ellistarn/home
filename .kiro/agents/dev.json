@@ -16,7 +16,7 @@
     "file://AmazonQ.md",
     "file://AGENTS.md",
     "file://README.md",
-    "file://.kiro/steering/**",
+    "file://.kiro/steering/**/*",
     "file://.amazonq/rules/**/*.md"
   ],
   "hooks": {},
