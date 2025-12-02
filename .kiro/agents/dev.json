@@ -10,7 +10,10 @@
   ],
   "toolAliases": {},
   "allowedTools": [
-    "shell"
+    "read",
+    "shell",
+    "web_fetch",
+    "web_search"
   ],
   "resources": [
     "file://AmazonQ.md",
