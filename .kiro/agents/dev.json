@@ -11,6 +11,7 @@
   "toolAliases": {},
   "allowedTools": [
     "read",
+    "write",
     "shell",
     "web_fetch",
     "web_search"
@@ -19,8 +20,7 @@
     "file://AmazonQ.md",
     "file://AGENTS.md",
     "file://README.md",
-    "file://~/.kiro/**/steering/**/*",
-    "file://.amazonq/rules/**/*.md"
+    "file://~/.kiro/**/steering/**/*"
   ],
   "hooks": {},
   "toolsSettings": {},
