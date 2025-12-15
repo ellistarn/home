@@ -32,9 +32,10 @@ bin/.*
 
 !.kiro
 !.kiro/agents
-!.kiro/agents/*
+!.kiro/agents/dev.json
 !.kiro/settings
 !.kiro/settings/*
 
 # Explicitly ignore
 .bashrc
+.kiro/settings/mcp.json
