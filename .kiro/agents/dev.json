@@ -20,12 +20,12 @@
     "file://AmazonQ.md",
     "file://AGENTS.md",
     "file://README.md",
-    "file:///Users/etarn/.aim/packages/EKSAgentSteering-1.0/context/cr.md",
-    "file:///Users/etarn/.aim/packages/EKSAgentSteering-1.0/context/code-review.md",
-    "file:///Users/etarn/.aim/packages/EKSAgentSteering-1.0/context/go-code-review.md",
-    "file:///Users/etarn/.aim/packages/EKSAgentSteering-1.0/context/controller-runtime-code-review.md",
-    "file:///Users/etarn/.aim/packages/EKSAgentSteering-1.0/context/session-management.md",
-    "file:///Users/etarn/.aim/packages/EKSAgentSteering-1.0/context/amazon-tooling.md"
+    "file://~/.aim/packages/EKSAgentSteering-1.0/context/cr.md",
+    "file://~/.aim/packages/EKSAgentSteering-1.0/context/code-review.md",
+    "file://~/.aim/packages/EKSAgentSteering-1.0/context/go-code-review.md",
+    "file://~/.aim/packages/EKSAgentSteering-1.0/context/controller-runtime-code-review.md",
+    "file://~/.aim/packages/EKSAgentSteering-1.0/context/session-management.md",
+    "file://~/.aim/packages/EKSAgentSteering-1.0/context/amazon-tooling.md"
   ],
   "hooks": {},
   "toolsSettings": {},
