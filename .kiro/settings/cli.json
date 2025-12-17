@@ -15,5 +15,7 @@
   "inline.enabled": true,
   "integrations.hyper.disabled": true,
   "integrations.terminal.disabled": true,
-  "mcp.loadedBefore": true
+  "mcp.loadedBefore": true,
+  "chat.enableDelegate": true,
+  "chat.enableTangentMode": true
 }

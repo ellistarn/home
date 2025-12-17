@@ -4,29 +4,44 @@
   "description": "Default agent",
   "prompt": null,
   "mcpServers": {
+    "builder-mcp": {
+      "command": "/Users/etarn/.toolbox/bin/builder-mcp",
+      "args": [],
+      "env": {},
+      "disabled": false
+    },
+    "aws-knowledge-mcp-server-mcp": {
+      "url": "https://knowledge-mcp.global.api.aws",
+      "type": "http",
+      "disabled": false
+    }
   },
   "tools": [
-    "*"
+    "@aws-knowledge-mcp-server-mcp/*",
+    "@builder-mcp/BrazilWorkspace",
+    "@builder-mcp/Delegate",
+    "@builder-mcp/InternalCodeSearch",
+    "@builder-mcp/InternalSearch",
+    "@builder-mcp/QuipEditor",
+    "@builder-mcp/ReadInternalWebsites",
+    "@builder-mcp/SkillsTool",
+    "@builder-mcp/TicketingReadActions",
+    "@builtin"
   ],
   "toolAliases": {},
   "allowedTools": [
-    "read",
-    "write",
-    "shell",
-    "web_fetch",
-    "web_search"
+    "@aws-knowledge-mcp-server-mcp/*",
+    "@builder-mcp/BrazilWorkspace",
+    "@builder-mcp/Delegate",
+    "@builder-mcp/InternalCodeSearch",
+    "@builder-mcp/InternalSearch",
+    "@builder-mcp/QuipEditor",
+    "@builder-mcp/ReadInternalWebsites",
+    "@builder-mcp/SkillsTool",
+    "@builder-mcp/TicketingReadActions",
+    "@builtin"
   ],
-  "resources": [
-    "file://AmazonQ.md",
-    "file://AGENTS.md",
-    "file://README.md",
-    "file://~/.aim/packages/EKSAgentSteering-1.0/context/cr.md",
-    "file://~/.aim/packages/EKSAgentSteering-1.0/context/code-review.md",
-    "file://~/.aim/packages/EKSAgentSteering-1.0/context/go-code-review.md",
-    "file://~/.aim/packages/EKSAgentSteering-1.0/context/controller-runtime-code-review.md",
-    "file://~/.aim/packages/EKSAgentSteering-1.0/context/session-management.md",
-    "file://~/.aim/packages/EKSAgentSteering-1.0/context/amazon-tooling.md"
-  ],
+  "resources": ["file://AGENTS.md"],
   "hooks": {},
   "toolsSettings": {},
   "useLegacyMcpJson": false,
