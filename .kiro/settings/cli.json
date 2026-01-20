@@ -6,16 +6,19 @@
   "autocomplete.immediatelyExecuteAfterSpace": true,
   "autocomplete.onlyShowOnTab": false,
   "autocomplete.preferVerboseSuggestions": true,
-  "chat.defaultAgent": "dev",
+  "chat.defaultAgent": "sw",
   "chat.defaultModel": "claude-opus-4.5",
+  "chat.disableAutoCompaction": true,
   "chat.enableContextUsageIndicator": true,
+  "chat.enableDelegate": true,
   "chat.enableKnowledge": true,
+  "chat.enableTangentMode": true,
   "chat.enableThinking": true,
   "chat.greeting.enabled": false,
   "inline.enabled": true,
   "integrations.hyper.disabled": true,
   "integrations.terminal.disabled": true,
+  "mcp.initTimeout": 0,
   "mcp.loadedBefore": true,
-  "chat.enableDelegate": true,
-  "chat.enableTangentMode": true
+  "chat.enableTodoList": true
 }

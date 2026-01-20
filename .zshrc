@@ -64,6 +64,10 @@ export KO_DOCKER_REPO=${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/dev
 export KUBE_EDITOR="code -w"
 export KUBECONFIG=./.kube/config:~/.kube/config
 
+# Claude Code
+export CLAUDE_CODE_USE_BEDROCK=1
+export AWS_REGION=us-west-2  # or your preferred region
+
 ##### Github #####
 export GITHUB_USER=ellistarn
 
