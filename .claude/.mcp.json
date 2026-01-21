@@ -5,7 +5,7 @@
       "command": "/Users/etarn/.toolbox/bin/builder-mcp",
       "args": []
     },
-    "aws-knowledge": {
+    "_aws-knowledge": {
       "type": "http",
       "url": "https://knowledge-mcp.global.api.aws"
     }
