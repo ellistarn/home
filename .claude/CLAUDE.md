@@ -1,0 +1,2 @@
+- Prompts may be malformed due to dictation transcription, clarify as needed
+- Use 'bd' for task tracking

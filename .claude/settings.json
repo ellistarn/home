@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "AskUserQuestion",
+      "Bash(bd:*)",
+      "Bash(brew info:*)",
+      "Bash(brew search:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh release list:*)",
+      "Bash(gh release view:*)",
+      "Bash(gh repo view:*)",
+      "Bash(grep:*)",
+      "Bash(htop:*)",
+      "Bash(ls:*)",
+      "Bash(ps:*)",
+      "Bash(top:*)",
+      "Glob",
+      "Grep",
+      "Read",
+      "WebFetch",
+      "WebSearch",
+      "mcp__builder-mcp__InternalCodeSearch",
+      "mcp__builder-mcp__InternalSearch",
+      "mcp__builder-mcp__ReadInternalWebsites",
+      "mcp__builder-mcp__SearchAcronymCentral",
+      "mcp__builder-mcp__SkillsTool",
+      "mcp__builder-mcp__TicketingReadActions",
+      "mcp__aws-knowledge__*"
+    ]
+  },
+  "model": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+  "statusLine": {
+    "type": "command",
+    "command": "/Users/etarn/.claude/statusline.sh"
+  }
+}

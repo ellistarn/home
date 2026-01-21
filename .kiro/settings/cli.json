@@ -1,9 +1,10 @@
 {
   "autocomplete.alwaysSuggestCurrentToken": false,
-  "autocomplete.disable": false,
+  "autocomplete.disable": true,
   "autocomplete.firstTokenCompletion": true,
   "autocomplete.fuzzySearch": true,
   "autocomplete.immediatelyExecuteAfterSpace": true,
+  "autocomplete.insertSpaceAutomatically": true,
   "autocomplete.onlyShowOnTab": false,
   "autocomplete.preferVerboseSuggestions": true,
   "chat.defaultAgent": "sw",
@@ -14,11 +15,11 @@
   "chat.enableKnowledge": true,
   "chat.enableTangentMode": true,
   "chat.enableThinking": true,
+  "chat.enableTodoList": true,
   "chat.greeting.enabled": false,
   "inline.enabled": true,
   "integrations.hyper.disabled": true,
   "integrations.terminal.disabled": true,
   "mcp.initTimeout": 0,
-  "mcp.loadedBefore": true,
-  "chat.enableTodoList": true
+  "mcp.loadedBefore": true
 }

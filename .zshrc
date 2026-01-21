@@ -1,12 +1,9 @@
-# Kiro CLI pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
-source $HOME/antigen.zsh
 # Awesome Zsh Plugins: https://github.com/unixorn/awesome-zsh-plugins
 # Antigen: https://github.com/zsh-users/antigen
 # Oh My Zsh: https://github.com/ohmyzsh/ohmyzsh
+source $HOME/antigen.zsh
 antigen use oh-my-zsh
 antigen theme romkatv/powerlevel10k
-
 
 antigen bundles <<BUNDLES
     zsh-users/zsh-autosuggestions
@@ -141,5 +138,3 @@ function aws_login() {
   open "https://isengard.amazon.com/federate?account=$ACCOUNT&role=$ROLE"
 }
 
-# Kiro CLI post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"

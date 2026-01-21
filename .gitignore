@@ -36,6 +36,14 @@ bin/.*
 !.kiro/settings
 !.kiro/settings/*
 
+# Claude
+!.claude
+!.claude/settings.json
+!.claude/statusline.sh
+!.claude/CLAUDE.md
+!.claude/agents
+!.claude/agents/*.md
+
 # Explicitly ignore
 .bashrc
 .kiro/settings/mcp.json
