@@ -43,6 +43,7 @@ bin/.*
 !.claude/CLAUDE.md
 !.claude/agents
 !.claude/agents/*.md
+!.claude/.mcp.json
 
 # Explicitly ignore
 .bashrc

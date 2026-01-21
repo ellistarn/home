@@ -3,6 +3,8 @@
     "allow": [
       "AskUserQuestion",
       "Bash(bd:*)",
+      "Bash(cd:*)",
+      "Bash(git status)",
       "Bash(brew info:*)",
       "Bash(brew search:*)",
       "Bash(gh issue list:*)",
