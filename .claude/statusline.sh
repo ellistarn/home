@@ -22,6 +22,10 @@ BG_GRN=$'\033[42m' FG_GRN=$'\033[32m'
 BG_BLU=$'\033[44m' FG_BLU=$'\033[34m'
 SEP=''
 
+# Icons (Nerd Font) - using UTF-8 hex sequences
+ICON_GIT=$'\xee\x82\xa0'
+ICON_FOLDER=$'\xef\x81\xbb'
+
 # Git segment
 git_seg="" next_fg=$FG_BLU
 if git -C "$cwd" rev-parse --git-dir &>/dev/null; then
@@ -42,10 +46,10 @@ if git -C "$cwd" rev-parse --git-dir &>/dev/null; then
 
     if [[ -n $git_status ]]; then
         git_bg=$'\033[48;5;220m' git_fg=$'\033[38;5;220m'
-        git_content="  $branch $git_status "
+        git_content=" $ICON_GIT $branch $git_status "
     else
         git_bg=$'\033[48;5;75m' git_fg=$'\033[38;5;75m'
-        git_content="  $branch "
+        git_content=" $ICON_GIT $branch "
     fi
     git_seg="${FG_BLU}${git_bg}${SEP}${FG_BLK}${git_content}"
     next_fg=$git_fg
@@ -109,5 +113,5 @@ fi
 
 # Output
 echo -n "${BG_GRN}${FG_BLK}${BLD} 󰚩 $model ${RST}"
-echo -n "${FG_GRN}${BG_BLU}${SEP}${FG_BLK}  $dir_name ${RST}"
+echo -n "${FG_GRN}${BG_BLU}${SEP}${FG_BLK} $ICON_FOLDER $dir_name ${RST}"
 echo -n "$git_seg$k8s_seg$ctx_seg$sess_seg${next_fg}${RST}${SEP}"
