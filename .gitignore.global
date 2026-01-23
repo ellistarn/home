@@ -3,3 +3,4 @@
 .vscode
 .terraform
 .llama
+.claude

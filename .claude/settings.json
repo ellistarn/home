@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "AskUserQuestion",
-      "Bash(bd:*)",
+      "Skill(beads:*)",
       "Bash(cd:*)",
       "Bash(git status)",
       "Bash(brew info:*)",
@@ -41,6 +41,7 @@
     "command": "/Users/etarn/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true
+    "gopls-lsp@claude-plugins-official": true,
+    "beads@beads-marketplace": true
   }
 }
