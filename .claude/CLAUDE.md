@@ -1,2 +1,2 @@
 - Prompts may be malformed due to dictation transcription, clarify as needed
-- Use 'bd' for task tracking
+- Do NOT use TodoWrite for task tracking - use 'bd' (beads) instead for ALL task management

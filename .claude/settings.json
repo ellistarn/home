@@ -16,6 +16,7 @@
       "Bash(gh release list:*)",
       "Bash(gh release view:*)",
       "Bash(gh repo view:*)",
+      "Bash(bd:*)",
       "Bash(grep:*)",
       "Bash(htop:*)",
       "Bash(ls:*)",
