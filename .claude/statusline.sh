@@ -25,14 +25,41 @@ SEP=''
 # Icons (Nerd Font) - using UTF-8 hex sequences
 ICON_GIT=$'\xee\x82\xa0'
 ICON_FOLDER=$'\xef\x81\xbb'
+ICON_PLAN=$'\xef\x87\x89'  # nf-md-file_document
+
+# Plan file segment - find plan referenced in current session
+plan_seg="" plan_next_fg=$FG_BLU
+BG_MAG=$'\033[48;5;133m' FG_MAG=$'\033[38;5;133m'
+session_id=$(jq_get '.session_id')
+if [[ -n "$session_id" ]]; then
+    # Build project path (same format Claude uses)
+    project_path=$(echo "$cwd" | sed 's|^/||; s|/|-|g')
+    session_file="$HOME/.claude/projects/-${project_path}/${session_id}.jsonl"
+
+    # Find most recent plan file referenced in this session
+    if [[ -f "$session_file" ]]; then
+        plan_file=$(grep -o "$HOME/.claude/plans/[^\"']*\.md" "$session_file" 2>/dev/null | tail -1)
+    fi
+
+    # Fallback to most recently modified plan
+    [[ -z "$plan_file" ]] && plan_file=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1)
+
+    if [[ -n "$plan_file" && -f "$plan_file" ]]; then
+        plan_name=$(basename "$plan_file" .md)
+        # OSC 8 hyperlink: cmd+click to open in VSCode/Ghostty
+        # OSC 8 hyperlink: \e]8;;URL\a text \e]8;;\a
+        plan_seg="${FG_BLU}${BG_MAG}${SEP}${FG_WHT} ${ICON_PLAN} "$'\e]8;;file://localhost'"${plan_file}"$'\a'"${plan_name:0:20}"$'\e]8;;\a'" "
+        plan_next_fg=$FG_MAG
+    fi
+fi
 
 # Git segment
-git_seg="" next_fg=$FG_BLU
+git_seg="" next_fg=$plan_next_fg
 if git -C "$cwd" rev-parse --git-dir &>/dev/null; then
     branch=$(git -C "$cwd" branch --show-current 2>/dev/null)
     [[ -z $branch ]] && branch=$(git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
 
-    status=$(git -C "$cwd" status --porcelain 2>/dev/null)
+    status=$(git -C "$cwd" --no-optional-locks status --porcelain 2>/dev/null)
     staged=$(echo "$status" | grep -c '^[MADRC]')
     modified=$(echo "$status" | grep -c '^.[MD]')
     untracked=$(echo "$status" | grep -c '^??')
@@ -51,7 +78,7 @@ if git -C "$cwd" rev-parse --git-dir &>/dev/null; then
         git_bg=$'\033[48;5;75m' git_fg=$'\033[38;5;75m'
         git_content=" $ICON_GIT $branch "
     fi
-    git_seg="${FG_BLU}${git_bg}${SEP}${FG_BLK}${git_content}"
+    git_seg="${next_fg}${git_bg}${SEP}${FG_BLK}${git_content}"
     next_fg=$git_fg
 fi
 
@@ -114,4 +141,4 @@ fi
 # Output
 echo -n "${BG_GRN}${FG_BLK}${BLD} 󰚩 $model ${RST}"
 echo -n "${FG_GRN}${BG_BLU}${SEP}${FG_BLK} $ICON_FOLDER $dir_name ${RST}"
-echo -n "$git_seg$k8s_seg$ctx_seg$sess_seg${next_fg}${RST}${SEP}"
+echo -n "$plan_seg$git_seg$k8s_seg$ctx_seg$sess_seg${next_fg}${RST}${SEP}"
