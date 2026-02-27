@@ -4,10 +4,6 @@
       "type": "stdio",
       "command": "/Users/etarn/.toolbox/bin/builder-mcp",
       "args": []
-    },
-    "_aws-knowledge": {
-      "type": "http",
-      "url": "https://knowledge-mcp.global.api.aws"
     }
   }
 }
