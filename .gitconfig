@@ -26,3 +26,6 @@
 	insteadOf = https://github.com/
 [gpg]
 	format = ssh
+
+[includeIf "gitdir:~/workspaces/"]
+	path = ~/.gitconfig-amazon

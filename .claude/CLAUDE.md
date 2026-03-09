@@ -5,3 +5,6 @@
 
 # Code Style
 - Comment on public interfaces, but only add comments to internals if something is unintuitive
+
+# Writing prose
+- Use signposting to help the reader follow the story. Say what you're going to say, say it, say what you said
