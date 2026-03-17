@@ -4,3 +4,5 @@
 .terraform
 .llama
 .claude
+.opencode
+.worktrees

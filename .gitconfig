@@ -14,6 +14,8 @@
 
 [alias]
 	graph = log --graph --all --pretty=format:\"%C(yellow)%h%Creset%C(cyan)%C(bold)%d%Creset %C(cyan)(%cr)%Creset %C(green)%<(12)%cn%Creset %s\"
+	# Delete branches whose remote is gone, clean up their worktrees, and pull main
+	gone = "!bash -c 'echo \"$(git branch --show-current)\" | grep -qE \"^(main|mainline)$\" || { echo \"error: must be on main or mainline\"; exit 1; } && git fetch -p && git branch -vv | grep \": gone]\" | sed \"s/^[*+] //\" | awk \"{print \\$1}\" | while read branch; do wt=$(git worktree list --porcelain | grep -B2 \"branch refs/heads/$branch\" | grep \"^worktree \" | sed \"s/^worktree //\"); if [ -n \"$wt\" ]; then git worktree remove \"$wt\" 2>&1 || { echo \"skip: $branch (dirty worktree: $wt)\"; continue; }; fi; git branch -D \"$branch\"; done && git pull --ff-only'"
 
 [color]
 	ui = auto

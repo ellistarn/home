@@ -42,6 +42,7 @@ for dir in $(find "$HOME/bin" -type d); do
 done
 
 ##### Environment #####
+#export MUSE_BUCKET=etarn-muse
 
 ##### Amazon #####
 path+=($HOME/.toolbox/bin)
