@@ -1,6 +1,6 @@
 ---
 name: declarative-designs
-description: Designs are the control plane for agentic development. Declare what matters, stay silent on the rest, and let implementations converge.
+description: How to author, implement from, and reconcile toward declarative designs — desired state declarations that implementations converge toward continuously.
 ---
 
 # Declarative Designs
