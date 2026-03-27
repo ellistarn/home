@@ -1,6 +1,6 @@
 ---
 name: declarative-designs
-description: Framework for design-driven development. Load when authoring designs, implementing from them, deciding what to preserve during changes, or reconciling implementations.
+description: Declare-and-converge model for agentic development. Load when authoring designs, implementing from them, or reconciling implementations.
 ---
 
 # Declarative Designs
