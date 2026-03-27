@@ -24,5 +24,6 @@ Designs are source. Implementations are compiled from them. The gap between curr
 ## On Designs Themselves
 
 - Designs declare intent, constraints, and quality attributes — not mechanism
+- A design is specific enough that an implementation can fail to satisfy it
 - Ambiguity about what is a design commitment vs. an implementation choice is a defect in the design
 - Implementation details in a design are revised to capture the underlying intent
