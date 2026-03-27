@@ -1,6 +1,6 @@
 ---
 name: declarative-designs
-description: Declare-and-converge model for agentic development. Load when authoring designs, implementing from them, or reconciling implementations.
+description: Designs are the control plane for agentic development. Declare what matters, stay silent on the rest, and let implementations converge.
 ---
 
 # Declarative Designs
