@@ -5,53 +5,43 @@ description: How to author, implement from, and reconcile toward declarative des
 
 # Declarative Designs
 
-A declarative design is a desired state declaration for a system. It says what the system is, what
-properties it has, and what constraints it operates under. It does not say how. An agent reads the
-design, evaluates the current implementation against it, and closes gaps. This is not spec-and-
-implement — it is declare-and-converge.
-
-The design is the control plane. The code is the data plane. The design persists across sessions,
-across refactors, across rewrites. The implementation is the variable that converges toward it. This
-is how any control system works — a stable reference input, a feedback loop, and an actuator that
-closes the error. The design is the reference. The agent is the controller. The implementation is the
-plant.
+A declarative design is a desired state declaration for a system — what it is, what properties it
+has, what constraints it operates under. It does not say how. This is not spec-and-implement. It is
+declare-and-converge. The design is the control plane. The code is the data plane. The design
+persists. The implementation converges toward it.
 
 ## Silence is the design
 
 A design declares what matters and is deliberately silent on everything else. That silence is not
-underspecification — it is the design. In Kubernetes, a Deployment says "three replicas of this
-image." It does not say which nodes, how to handle failures, or how to sequence a rollout. The
-controller's intelligence fills that silence, and fills it differently as conditions change. The
-sparseness is what makes the system powerful.
+underspecification — it is the design. A Kubernetes Deployment says "three replicas of this image." It
+does not say which nodes, how to handle failures, or how to sequence a rollout. The controller fills
+that silence, and fills it differently as conditions change. The sparseness is what makes the system
+powerful.
 
-The same holds here. A design that says "producers and consumers are decoupled and independently
-scalable" gives an agent room to choose message queues today and shared-memory channels tomorrow. A
-design that says "use RabbitMQ" has locked the implementation without gaining anything. The intent
-survives technology transitions. The mechanism does not.
+A design that says "producers and consumers are decoupled and independently scalable" gives room to
+choose message queues today and shared-memory channels tomorrow. A design that says "use RabbitMQ" has
+locked the implementation without gaining anything. Intent survives technology transitions. Mechanism
+does not.
 
-This is also where speed comes from. You do not need to write a detailed specification. You need to
-declare objectives and constraints. The agent fills in everything else — and because the design
-persists across reconciliation passes, the cost is paid once. Every pass after that is convergence.
-A detailed spec is a one-time expenditure that goes stale. A sparse design is a durable asset that
-compounds.
+Speed comes from this sparseness. Declare objectives and constraints. The rest is filled in — and
+because the design persists across reconciliation passes, that cost is paid once. A detailed spec is a
+one-time expenditure that goes stale. A sparse design compounds.
 
 ## Reconciliation
 
-The steady state is continuous reconciliation. The agent evaluates the current implementation against
-the design and closes gaps — better test coverage, tighter error handling, more accurate
-documentation, cleaner structure. None of these change what the system is. They improve how well the
-implementation satisfies it.
-
-This is what makes speed safe. Ship fast, because there is a defined target to converge toward.
-Velocity without a design is drift. Velocity with a design is iteration.
+The steady state is continuous reconciliation — evaluating the current implementation against the
+design and closing gaps. Better test coverage, tighter error handling, more accurate documentation,
+cleaner structure. None of these change what the system is. They improve how well the implementation
+satisfies it. This is what makes speed safe. Velocity without a design is drift. Velocity with a
+design is iteration.
 
 When a design changes, the implementation converges toward the new state. Choices that still satisfy
-the updated design survive. Those that do not get replaced. This is convergence, not rebuild.
+the updated design survive. Those that do not get replaced. Convergence, not rebuild.
 
-Test coverage validates design commitments, not implementation details. Tests rooted in implementation
-break when the implementation changes, even when the design is still satisfied. Tests rooted in
-design commitments are stable across refactors, and they answer the question that matters: does this
-implementation do what the design says it should?
+Tests validate design commitments, not implementation details. Tests rooted in implementation break
+when the implementation changes, even when the design is still satisfied. Tests rooted in design
+commitments survive refactors and answer the question that matters: does this implementation do what
+the design says it should?
 
 ## Designs grow through use
 
@@ -62,24 +52,34 @@ real conditions, constraints that were implicit but never captured.
 When implementation reveals a design was wrong, the design is updated explicitly. The implementation
 does not silently become the new design. When usage reveals a gap, that gap becomes a design revision,
 not an implementation workaround. A workaround encodes the discovery where it cannot be reasoned
-about, cannot be tested against, and will be lost the next time the implementation is re-derived. A
-revision makes the discovery permanent.
-
-Designs improve in accuracy and specificity over time, not in length.
+about or tested against, and will be lost the next time the implementation is re-derived. A revision
+makes the discovery permanent.
 
 ## What makes a design work
 
-Everything above depends on the design being good enough to reconcile toward. Three properties make
-that possible.
+A design occupies a context window. It competes for attention with the implementation, the tests, the
+conversation. Every sentence that does not carry weight degrades the ones that do. This is not a style
+concern — it is functional. A wordy design wastes the same resource that makes reconciliation
+possible.
 
-A design declares intent — not mechanism. It captures what and why. Mechanism belongs to the
-implementation, where agents have latitude to improve it freely.
+**Intent, not mechanism.** A design captures what and why. Mechanism belongs to the implementation.
+A design that prescribes how has spent its budget on the part that changes and left nothing for the
+part that persists.
 
-A design is specific enough that an implementation can fail to satisfy it. "The system is performant"
-cannot be reconciled toward. It provides no signal about whether the current state is adequate or
-falling short. Specificity is what makes the feedback loop functional.
+**Specific enough to violate.** A design that cannot be failed cannot be reconciled toward. "The
+system is performant" provides no signal about whether the current state is adequate. Specificity is
+what makes the feedback loop functional.
 
-A design is clear about its own boundaries — what is a commitment and what is left to the
-implementation. Ambiguity here is a defect. The boundary between commitment and freedom is the most
-important thing a design communicates, because everything on one side is protected and everything on
-the other side is available for improvement.
+**Clear boundaries.** What is a commitment and what is left to the implementation. Ambiguity here is
+a defect — without this boundary, there is no way to know what to protect and what to improve.
+
+**Generative.** A design builds understanding that transfers to situations it did not enumerate. A
+thesis that produces its conclusions is more durable than a list of assertions, because the thesis
+adapts to new contexts while the list can only be consulted. The reasoning should be visible enough
+that a reader can extend it.
+
+**Every word earns its place.** Designs improve in accuracy and specificity over time, not in length.
+A sentence that restates a previous one, a flourish that does not inform, a word that could be cut —
+each one costs attention that should have gone to signal. Compression is not brevity for its own
+sake. It is respect for the constraint that makes designs work: finite attention, applied to what
+matters.
