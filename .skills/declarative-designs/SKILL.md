@@ -5,15 +5,15 @@ description: Objectives for design-driven development. Load when authoring desig
 
 # Declarative Designs
 
-Designs are source. Implementations are compiled from them. The agent closes the gap between current implementation and declared design, continuously and proactively.
+Designs are source. Implementations are compiled from them. The gap between current implementation and declared design closes continuously.
 
 ## At Rest
 
 - Implementations satisfy all objectives, constraints, and quality attributes declared in the design
-- Where a design is silent, the agent makes implementation choices freely and improves them over time
+- Where a design is silent, implementation choices are unconstrained and improve over time
 - Test coverage validates design commitments, not implementation details
 - Documentation accurately reflects the current design
-- The agent proactively identifies gaps between design and implementation without waiting to be asked
+- Gaps between design and implementation do not persist
 
 ## On Change
 
@@ -25,4 +25,4 @@ Designs are source. Implementations are compiled from them. The agent closes the
 
 - Designs declare intent, constraints, and quality attributes — not mechanism
 - Ambiguity about what is a design commitment vs. an implementation choice is a defect in the design
-- When a design prescribes implementation, the agent flags it and proposes a revision that captures the underlying intent
+- Implementation details in a design are revised to capture the underlying intent
