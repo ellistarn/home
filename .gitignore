@@ -45,6 +45,10 @@ bin/.*
 !.claude/agents/*.md
 !.claude/.mcp.json
 
+# Skills
+!.skills
+!.skills/**
+
 # Explicitly ignore
 .bashrc
 .kiro/settings/mcp.json
