@@ -18,8 +18,7 @@ reference, a feedback loop, a process that closes the error.
 This is not spec-and-implement. A spec is consumed once and goes stale. A design persists across
 sessions, refactors, and rewrites — the implementation gets better against it each time. As an
 artifact, a design is text that occupies a context window, competes for attention, and steers work.
-A thesis that builds understanding is more durable than a list of assertions. Every sentence that
-does not carry weight degrades the ones that do.
+Every sentence that does not carry weight degrades the ones that do.
 
 ## Writing designs
 
@@ -83,9 +82,10 @@ commitment — it is a wish._
 
 ### Boundaries
 
-Every design commitment must be unambiguous about whether it is a commitment. The messaging design
-above draws this boundary: at-least-once delivery is committed, exactly-once is not. A reader knows
-which is which.
+Specificity asks whether a commitment is precise enough to be violated. Boundaries asks a prior
+question: is it clear which concerns are commitments and which are left to the implementation? The
+messaging design above draws this boundary: at-least-once delivery is committed, exactly-once is not.
+A reader knows which is which.
 
 The failure mode is ambiguity — the silent cousin of vagueness. "Messages are delivered to
 consumers." Is ordering a commitment? Is exactly-once? The implementation will decide, and those
