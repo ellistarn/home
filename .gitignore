@@ -49,6 +49,11 @@ bin/.*
 !.skills
 !.skills/**
 
+# OpenCode
+!.opencode
+!.opencode/commands
+!.opencode/commands/*.md
+
 # Explicitly ignore
 .bashrc
 .kiro/settings/mcp.json
