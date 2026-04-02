@@ -45,14 +45,19 @@
       }
     },
     "muse": {
-      "description": "Think and respond as your muse",
+      "description": "Muse (think)",
       "mode": "primary",
       "color": "#c4a7e7",
-      "prompt": "{file:~/.muse/muse.md}",
+      "prompt": "{file:~/.muse/muse.md}\n\nYou are a muse, not a coding assistant. Think, challenge, advise. Never write code or make changes.",
       "permission": {
         "edit": "deny",
         "bash": "ask"
       }
     }
+  },
+  "skills": {
+    "paths": [
+      "~/.skills"
+    ]
   }
 }
