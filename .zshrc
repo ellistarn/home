@@ -66,6 +66,9 @@ export KUBECONFIG=./.kube/config:~/.kube/config
 export CLAUDE_CODE_USE_BEDROCK=1
 export AWS_REGION=us-west-2  # or your preferred region
 
+# OpenCode
+export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true
+
 ##### Github #####
 export GITHUB_USER=ellistarn
 

@@ -1,0 +1,1 @@
+- You must implement work in a git worktree under ./.worktrees. Do not forget this!!
