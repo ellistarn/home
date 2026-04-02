@@ -10,19 +10,26 @@
   "mcp": {
     "builder-mcp": {
       "type": "local",
-      "command": ["/Users/etarn/.toolbox/bin/builder-mcp", "--include-tools", "InternalCodeSearch,InternalSearch,ReadInternalWebsites,WorkspaceSearch,WorkspaceGitDetails,BrazilBuildAnalyzerTool"],
+      "command": [
+        "/Users/etarn/.toolbox/bin/builder-mcp",
+        "--include-tools",
+        "InternalCodeSearch,InternalSearch,ReadInternalWebsites,WorkspaceSearch,WorkspaceGitDetails,BrazilBuildAnalyzerTool"
+      ],
       "enabled": true
     },
     "ellis": {
       "type": "local",
-      "command": ["/Users/etarn/go/bin/muse", "listen"],
+      "command": [
+        "/Users/etarn/go/bin/muse",
+        "listen"
+      ],
       "enabled": true
     }
   },
   "instructions": [],
   "tools": {
     "builder-mcp_*": false,
-    "ellis_*": false
+    "ellis_*": true
   },
   "agent": {
     "build": {
