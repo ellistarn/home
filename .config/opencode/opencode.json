@@ -18,7 +18,7 @@
       "enabled": true
     }
   },
-  "instructions": ["~/.muse/muse.md"],
+  "instructions": [],
   "tools": {
     "builder-mcp_*": false,
     "ellis_*": false
