@@ -54,5 +54,10 @@
         "bash": "ask"
       }
     }
+  },
+  "skills": {
+    "paths": [
+      "~/.skills"
+    ]
   }
 }
