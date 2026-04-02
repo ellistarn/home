@@ -18,7 +18,7 @@
       "enabled": true
     }
   },
-  "instructions": ["~/.muse/muse.md"],
+  "instructions": [],
   "tools": {
     "builder-mcp_*": false,
     "ellis_*": false
@@ -40,7 +40,11 @@
       "description": "Think and respond as your muse",
       "mode": "primary",
       "color": "#c4a7e7",
-      "prompt": "{file:~/.muse/muse.md}"
+      "prompt": "{file:~/.muse/muse.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
     }
   }
 }
