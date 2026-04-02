@@ -50,6 +50,11 @@ bin/.*
 !.skills/**
 
 # OpenCode
+!.config
+!.config/opencode
+!.config/opencode/opencode.json
+!.config/opencode/skills
+!.config/opencode/skills/**
 !.opencode
 !.opencode/commands
 !.opencode/commands/*.md
