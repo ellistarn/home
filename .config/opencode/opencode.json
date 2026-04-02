@@ -1,0 +1,46 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "amazon-bedrock/us.anthropic.claude-opus-4-6",
+  "permission": {
+    "external_directory": {
+      "~/go/src/github.com/ellistarn/**": "allow"
+    }
+  },
+  "mcp": {
+    "builder-mcp": {
+      "type": "local",
+      "command": ["/Users/etarn/.toolbox/bin/builder-mcp", "--include-tools", "InternalCodeSearch,InternalSearch,ReadInternalWebsites,WorkspaceSearch,WorkspaceGitDetails,BrazilBuildAnalyzerTool"],
+      "enabled": true
+    },
+    "ellis": {
+      "type": "local",
+      "command": ["/Users/etarn/go/bin/muse", "listen"],
+      "enabled": true
+    }
+  },
+  "instructions": ["~/.muse/muse.md"],
+  "tools": {
+    "builder-mcp_*": false,
+    "ellis_*": false
+  },
+  "agent": {
+    "build": {
+      "tools": {
+        "builder-mcp_*": true,
+        "ellis_*": true
+      }
+    },
+    "plan": {
+      "tools": {
+        "builder-mcp_*": true,
+        "ellis_*": true
+      }
+    },
+    "muse": {
+      "description": "Think and respond as your muse",
+      "mode": "primary",
+      "color": "#c4a7e7",
+      "prompt": "{file:~/.muse/muse.md}"
+    }
+  }
+}
