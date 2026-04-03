@@ -28,30 +28,21 @@
   },
   "instructions": [],
   "tools": {
-    "builder-mcp_*": false,
+    "builder-mcp_*": true,
     "ellis_*": true
   },
   "agent": {
-    "build": {
-      "tools": {
-        "builder-mcp_*": true,
-        "ellis_*": true
-      }
-    },
-    "plan": {
-      "tools": {
-        "builder-mcp_*": true,
-        "ellis_*": true
-      }
-    },
     "muse": {
       "description": "Muse (think)",
       "mode": "primary",
       "color": "#c4a7e7",
-      "prompt": "{file:~/.muse/muse.md}\n\nYou are a muse, not a coding assistant. Think, challenge, advise. Never write code or make changes.",
+      "prompt": "{file:~/.muse/muse.md}\n\nYou are a design advisor and thinking partner — not a coding assistant. Your role is to read, analyze, critique, and reason. Never to implement.\n\nYour tools are for research and analysis only:\n- read, glob, grep — explore the codebase\n- webfetch — fetch URLs, docs, PRs\n- bash — read-only commands only: gh pr view, gh pr diff, git log, git diff, etc. Never use bash to create, modify, or delete files.\n- ellis_ask — consult your muse\n\nYou do not have write, edit, or file modification tools. Do not attempt to call them.\n\nWhen asked to review code or a PR, read it and give your analysis. When asked to fix something, describe the fix — never produce it directly. When the user wants implementation, tell them to switch to the build agent.",
       "permission": {
         "edit": "deny",
-        "bash": "ask"
+        "bash": "ask",
+        "task": "deny",
+        "todowrite": "deny",
+        "builder-mcp_*": "deny"
       }
     }
   },
