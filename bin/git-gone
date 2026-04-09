@@ -1,0 +1,65 @@
+#!/bin/bash
+set -euo pipefail
+
+dry_run=false
+[ "${1:-}" = "-n" ] || [ "${1:-}" = "--dry-run" ] && dry_run=true
+
+# Must be in main worktree
+[ "$(git rev-parse --git-dir)" = ".git" ] || {
+    echo "error: must be in main worktree, not a linked worktree" >&2
+    exit 1
+}
+
+git fetch -p -q
+
+current=$(git branch --show-current)
+origin_repo=$(git remote get-url origin | sed -E 's|.*github\.com[:/]||; s|\.git$||; s|/+$||')
+
+remove_branch() {
+    local branch=$1
+    local reason=$2
+
+    local wt
+    wt=$(git worktree list --porcelain \
+        | grep -B2 -E "^branch refs/heads/$branch$" \
+        | grep "^worktree " | sed "s/^worktree //" || true)
+
+    if $dry_run; then
+        echo "would remove: $branch ($reason)${wt:+ [worktree: $wt]}"
+        return 0
+    fi
+
+    if [ -n "$wt" ]; then
+        git worktree remove "$wt" 2>/dev/null || {
+            echo "skip: $branch (dirty worktree: $wt)"
+            return 0
+        }
+    fi
+    git branch -D "$branch"
+}
+
+while read -r branch upstream; do
+    [ "$branch" = "$current" ] && continue
+
+    if [ -n "$upstream" ]; then
+        # Has tracking — only clean if upstream ref is gone
+        git show-ref --verify --quiet "$upstream" 2>/dev/null && continue
+        remove_branch "$branch" "tracking branch deleted"
+    else
+        # No tracking — check for remote ref, then ask gh for merged PR.
+        # gh is the authoritative signal — if it fails or is unavailable,
+        # the branch is kept (safe default).
+        git show-ref --verify --quiet "refs/remotes/origin/$branch" 2>/dev/null && continue
+        count=$(gh pr list --repo "$origin_repo" --state merged --head "$branch" --json number --jq 'length' 2>/dev/null) || continue
+        [ "$count" -gt 0 ] || continue
+        remove_branch "$branch" "merged PR"
+    fi
+done < <(git for-each-ref --format='%(refname:short) %(upstream)' refs/heads/)
+
+# Warn if current branch was deleted on remote, otherwise pull
+current_upstream=$(git for-each-ref --format='%(upstream)' "refs/heads/$current")
+if [ -n "$current_upstream" ] && ! git show-ref --verify --quiet "$current_upstream" 2>/dev/null; then
+    echo "warning: current branch '$current' was deleted on remote"
+elif ! $dry_run; then
+    git rev-parse --abbrev-ref '@{u}' &>/dev/null && git pull --ff-only
+fi
