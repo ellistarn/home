@@ -1,1 +1,1 @@
-- You must implement work in a git worktree under ./.worktrees. Do not forget this!!
+- Work in .worktrees/$(date +%m%dT%H%M)-$RANDOM-<task>. Do not forget this!!

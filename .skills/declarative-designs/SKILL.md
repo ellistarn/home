@@ -59,6 +59,11 @@ Apply these checks to every commitment:
 - **Boundary clear?** Where the design is silent, the agent decides — and those decisions become
   implicit commitments. If freedom is intended, say so. "Messages are delivered to consumers,
   ordering is not guaranteed" — now the reader knows ordering is delegated, not forgotten.
+- **Self-contained?** A design must be interpretable and reconcilable in isolation. If understanding
+  a design requires reading another design, the design is incomplete — the missing content belongs
+  here, stated in its own terms. Multiple designs can describe the same system (one declares the
+  networking posture, another the storage posture), but no design may delegate its obligations to
+  another design. "See the storage design for boundaries" is a gap, not a reference.
 
 ### Implementing
 
