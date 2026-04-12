@@ -1,8 +1,30 @@
 #!/bin/bash
 # git-gone — delete branches whose work has landed; show what remains.
 #
-# Never removes a branch with unmerged local commits or an active worktree.
+# Never removes a branch with unmerged local commits.
+# Never removes a worktree with uncommitted changes.
 # When in doubt, keeps the branch.
+#
+# Classification (shown in the Remaining table):
+#
+#   current     — the checked-out branch; never touched
+#   in progress — own remote (origin/<branch>) is still alive
+#   active      — no committed work yet (branch tip == a remote ref),
+#                 but worktree has uncommitted changes; work is in flight
+#   merged      — all commits landed (regular or squash merge); worktree
+#                 is dirty so auto-removal is blocked
+#   abandoned   — had an upstream that is now gone, but local commits are
+#                 not reachable from any remote (unmerged, unrecoverable
+#                 without the delete command)
+#   local       — no upstream, no remote, and commits are not yet merged;
+#                 new work that has not been pushed
+#
+# Branches not in the table were auto-deleted (work confirmed landed,
+# worktree absent or clean).
+#
+# Merge detection uses both ancestry (git log --not --remotes) and patch
+# equivalence (git cherry) to handle squash merges correctly.  No gh CLI
+# dependency.
 set -euo pipefail
 
 dry_run=false
@@ -33,8 +55,6 @@ git fetch -p -q
 printf " done.\n\n"
 
 current=$(git branch --show-current)
-origin_repo=$(git remote get-url origin \
-    | sed -E 's|.*github\.com[:/]||; s|\.git$||; s|/+$||')
 
 # Cache worktree list once — parsed N times instead of N subprocess calls
 _worktree_list=$(git worktree list --porcelain)
@@ -48,6 +68,77 @@ get_worktree() {
 
 # keep BRANCH STATUS DELETE_CMD
 keep() { remaining_entries+=("${1}${SEP}${2}${SEP}${3}"); }
+
+# commits_unmerged BRANCH — print commits from BRANCH not yet merged into any
+# remote ref, accounting for both regular merges (ancestry) and squash merges
+# (patch equivalence via git cherry).  Empty output means the branch is merged.
+commits_unmerged() {
+    local branch=$1
+    # Fast path: ancestry check — works for regular merges.
+    local by_ancestry
+    by_ancestry=$(git log --oneline "refs/heads/$branch" --not --remotes=origin 2>/dev/null)
+    [ -z "$by_ancestry" ] && return 0  # all commits reachable — merged
+
+    # Squash merge check: if all commits have patch equivalents in some remote
+    # ref (git cherry returns only '-' lines), the branch was squash-merged.
+    # Skip remote refs that produce no cherry output (unrelated histories).
+    # grep -Fv -- '->' filters out "origin/HEAD -> origin/main": after
+    # tr -d ' ' it becomes "origin/HEAD->origin/main" and git cherry exits 128.
+    local remote_ref cherry_out
+    while IFS= read -r remote_ref; do
+        cherry_out=$(git cherry "$remote_ref" "$branch" 2>/dev/null)
+        [ -z "$cherry_out" ] && continue           # no commits to compare — skip
+        echo "$cherry_out" | grep -q '^+' && continue  # unmerged commits remain
+        return 0  # all commits matched — squash merged
+    done < <(git branch -r 2>/dev/null | tr -d ' ' | grep '^origin/' | grep -Fv -- '->')
+
+    # Not merged by either check
+    echo "$by_ancestry"
+}
+
+# worktree_is_dirty PATH — true if the worktree has uncommitted changes.
+worktree_is_dirty() {
+    [ -n "$(git -C "$1" status --porcelain 2>/dev/null)" ]
+}
+
+# remove_merged_worktree_branch BRANCH WORKTREE — auto-remove a merged branch and
+# its worktree when the worktree is clean; keep with a hint when it is dirty.
+# A dirty worktree on a branch with no committed work is "active" (thinking
+# before committing), not "merged".
+remove_merged_worktree_branch() {
+    local branch=$1 wt=$2
+    if worktree_is_dirty "$wt"; then
+        # Distinguish "merged with dirty worktree" from "active: no commits yet".
+        # If the branch tip is identical to a remote ref, no work has been
+        # committed — the branch is in active development, not merged.
+        local tip label="merged"
+        tip=$(git rev-parse "refs/heads/$branch" 2>/dev/null)
+        while IFS= read -r remote_ref; do
+            if [ "$(git rev-parse "$remote_ref" 2>/dev/null)" = "$tip" ]; then
+                label="active"; break
+            fi
+        done < <(git branch -r 2>/dev/null | tr -d ' ' | grep '^origin/' | grep -Fv -- '->')
+        if [ "$label" = "active" ]; then
+            # Work is in flight — don't generate a delete command; the user
+            # needs to commit or stash before this branch can be removed.
+            # (After stashing, re-run git-gone — the clean worktree will
+            # auto-remove since there are no unmerged commits.)
+            keep "$branch" "$label" "(commit or stash first, then re-run git-gone)"
+        else
+            # Work is landed — safe to force-remove the dirty worktree.
+            keep "$branch" "$label" \
+                "git worktree remove --force \"$wt\" && git branch -D $branch"
+        fi
+        return 0
+    fi
+    if $dry_run; then
+        deleted_branches+=("$branch")
+        return 0
+    fi
+    git worktree remove "$wt"
+    git branch -D "$branch" >/dev/null
+    deleted_branches+=("$branch")
+}
 
 # remove_branch BRANCH — delete branch; callers must guard against worktrees first.
 remove_branch() {
@@ -75,8 +166,9 @@ while read -r branch upstream; do
     wt=$(get_worktree "$branch")
 
     if [ -n "$upstream" ]; then
-        if git show-ref --verify --quiet "$upstream" 2>/dev/null; then
-            # Remote still alive — in progress
+        if [ "$upstream" = "refs/remotes/origin/$branch" ] \
+                && git show-ref --verify --quiet "$upstream" 2>/dev/null; then
+            # Own remote still alive — in progress
             if [ -n "$wt" ]; then
                 keep "$branch" "in progress" \
                     "git push origin --delete $branch && git worktree remove \"$wt\" && git branch -D $branch"
@@ -87,9 +179,9 @@ while read -r branch upstream; do
             continue
         fi
 
-        # Remote gone — check for unmerged local commits
-        local_tip=$(git rev-parse "refs/heads/$branch")
-        unmerged=$(git log --oneline "$local_tip" --not --remotes=origin 2>/dev/null)
+        # Remote gone (or upstream is a base branch, not own remote) —
+        # check for unmerged local commits (handles squash merges)
+        unmerged=$(commits_unmerged "$branch")
         if [ -n "$unmerged" ]; then
             if [ -n "$wt" ]; then
                 keep "$branch" "abandoned" \
@@ -100,7 +192,7 @@ while read -r branch upstream; do
             continue
         fi
         # Remote gone, all commits merged — remove it
-        [ -n "$wt" ] && { keep "$branch" "merged" "git worktree remove \"$wt\" && git branch -D $branch"; continue; }
+        [ -n "$wt" ] && { remove_merged_worktree_branch "$branch" "$wt"; continue; }
         remove_branch "$branch"
     else
         # No upstream tracking ref
@@ -115,20 +207,9 @@ while read -r branch upstream; do
             continue
         fi
 
-        # Ask gh for a merged PR (safe default: keep branch if gh unavailable)
-        merge_shas=$(gh pr list --repo "$origin_repo" --state merged \
-            --head "$branch" --json mergeCommit \
-            --jq '.[].mergeCommit.oid' 2>/dev/null) || {
-            if [ -n "$wt" ]; then
-                keep "$branch" "local" \
-                    "git worktree remove \"$wt\" && git branch -D $branch"
-            else
-                keep "$branch" "local" "git branch -D $branch"
-            fi
-            continue
-        }
-
-        if [ -z "$merge_shas" ]; then
+        # No upstream, no remote — check if work landed (handles squash merges)
+        unmerged=$(commits_unmerged "$branch")
+        if [ -n "$unmerged" ]; then
             if [ -n "$wt" ]; then
                 keep "$branch" "local" \
                     "git worktree remove \"$wt\" && git branch -D $branch"
@@ -138,27 +219,7 @@ while read -r branch upstream; do
             continue
         fi
 
-        # Verify local tip is an ancestor of the merge commit — not just a name match
-        local_tip=$(git rev-parse "refs/heads/$branch")
-        is_merged=false
-        while read -r sha; do
-            [ -n "$sha" ] || continue
-            if git merge-base --is-ancestor "$local_tip" "$sha" 2>/dev/null; then
-                is_merged=true; break
-            fi
-        done <<< "$merge_shas"
-
-        if [ "$is_merged" = "false" ]; then
-            if [ -n "$wt" ]; then
-                keep "$branch" "local" \
-                    "git worktree remove \"$wt\" && git branch -D $branch"
-            else
-                keep "$branch" "local" "git branch -D $branch"
-            fi
-            continue
-        fi
-
-        [ -n "$wt" ] && { keep "$branch" "merged" "git worktree remove \"$wt\" && git branch -D $branch"; continue; }
+        [ -n "$wt" ] && { remove_merged_worktree_branch "$branch" "$wt"; continue; }
         remove_branch "$branch"
     fi
 done < <(git for-each-ref --format='%(refname:short) %(upstream)' refs/heads/)
@@ -205,6 +266,7 @@ if [ ${#remaining_entries[@]} -gt 0 ]; then
         case "$s" in
             current)       color="$CYAN"   ;;
             "in progress") color="$GREEN"  ;;
+            active)        color="$GREEN"  ;;
             abandoned)     color="$YELLOW" ;;
             *)             color="$DIM"    ;;
         esac
