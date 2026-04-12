@@ -15,6 +15,10 @@ git fetch -p -q
 current=$(git branch --show-current)
 origin_repo=$(git remote get-url origin | sed -E 's|.*github\.com[:/]||; s|\.git$||; s|/+$||')
 
+# Branches checked out in any worktree are live — never touch them
+worktree_branches=$(git worktree list --porcelain \
+    | grep '^branch refs/heads/' | sed 's|^branch refs/heads/||')
+
 remove_branch() {
     local branch=$1
     local reason=$2
@@ -41,6 +45,9 @@ remove_branch() {
 while read -r branch upstream; do
     [ "$branch" = "$current" ] && continue
 
+    # Never touch a branch checked out in a worktree — it's an active session
+    echo "$worktree_branches" | grep -qFx "$branch" && continue
+
     if [ -n "$upstream" ]; then
         # Has tracking — only clean if upstream ref is gone
         git show-ref --verify --quiet "$upstream" 2>/dev/null && continue
@@ -50,8 +57,24 @@ while read -r branch upstream; do
         # gh is the authoritative signal — if it fails or is unavailable,
         # the branch is kept (safe default).
         git show-ref --verify --quiet "refs/remotes/origin/$branch" 2>/dev/null && continue
-        count=$(gh pr list --repo "$origin_repo" --state merged --head "$branch" --json number --jq 'length' 2>/dev/null) || continue
-        [ "$count" -gt 0 ] || continue
+
+        # Get merge commit SHAs for all merged PRs with this branch name
+        merge_shas=$(gh pr list --repo "$origin_repo" --state merged --head "$branch" \
+            --json mergeCommit --jq '.[].mergeCommit.oid' 2>/dev/null) || continue
+        [ -n "$merge_shas" ] || continue
+
+        # Verify local tip is an ancestor of a merge commit — not just a name match
+        local_tip=$(git rev-parse "refs/heads/$branch")
+        is_merged=false
+        while read -r sha; do
+            [ -n "$sha" ] || continue
+            if git merge-base --is-ancestor "$local_tip" "$sha" 2>/dev/null; then
+                is_merged=true
+                break
+            fi
+        done <<< "$merge_shas"
+        $is_merged || continue
+
         remove_branch "$branch" "merged PR"
     fi
 done < <(git for-each-ref --format='%(refname:short) %(upstream)' refs/heads/)
