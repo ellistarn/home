@@ -8,23 +8,23 @@
 # Classification (shown in the Remaining table):
 #
 #   current     — the checked-out branch; never touched
-#   in progress — own remote (origin/<branch>) is still alive
+#   in progress — own remote (origin/<branch>) is still alive and
+#                 commits have not yet landed on any base branch
 #   active      — no committed work yet (branch tip == a remote ref),
 #                 but worktree has uncommitted changes; work is in flight
 #   merged      — all commits landed (regular or squash merge); worktree
 #                 is dirty so auto-removal is blocked
-#   abandoned   — had an upstream that is now gone, but local commits are
-#                 not reachable from any remote (unmerged, unrecoverable
-#                 without the delete command)
+#   unmatched   — remote is gone and local commits can't be matched to any
+#                 remote ref (ancestry or patch equivalence).  Often a
+#                 squash merge whose patches diverged.
 #   local       — no upstream, no remote, and commits are not yet merged;
 #                 new work that has not been pushed
 #
 # Branches not in the table were auto-deleted (work confirmed landed,
 # worktree absent or clean).
 #
-# Merge detection uses both ancestry (git log --not --remotes) and patch
-# equivalence (git cherry) to handle squash merges correctly.  No gh CLI
-# dependency.
+# Merge detection uses ancestry (git log --not --remotes) and patch
+# equivalence (git cherry) to handle squash merges correctly.
 set -euo pipefail
 
 dry_run=false
@@ -49,6 +49,7 @@ SEP=$'\x1f'
 
 remaining_entries=()  # each entry: "branch${SEP}status${SEP}delete_cmd"
 deleted_branches=()
+deleted_remote_branches=()  # branches whose remote was also deleted
 
 printf "Fetching..."
 git fetch -p -q
@@ -69,14 +70,32 @@ get_worktree() {
 # keep BRANCH STATUS DELETE_CMD
 keep() { remaining_entries+=("${1}${SEP}${2}${SEP}${3}"); }
 
-# commits_unmerged BRANCH — print commits from BRANCH not yet merged into any
-# remote ref, accounting for both regular merges (ancestry) and squash merges
-# (patch equivalence via git cherry).  Empty output means the branch is merged.
+# commits_unmerged BRANCH [EXCLUDE_REF] — print commits from BRANCH not yet
+# merged into any remote ref, accounting for both regular merges (ancestry)
+# and squash merges (patch equivalence via git cherry).  Empty output means
+# the branch is merged.
+#
+# When EXCLUDE_REF is given (e.g. refs/remotes/origin/$branch), that ref is
+# excluded from both the ancestry and cherry checks.  This prevents a branch's
+# own remote from self-satisfying the "merged" check — used when the remote
+# is still alive and we need to know if commits landed on a DIFFERENT branch.
 commits_unmerged() {
     local branch=$1
+    local exclude_ref=${2:-}
+
     # Fast path: ancestry check — works for regular merges.
     local by_ancestry
-    by_ancestry=$(git log --oneline "refs/heads/$branch" --not --remotes=origin 2>/dev/null)
+    if [ -n "$exclude_ref" ]; then
+        # Build explicit ^ref args for every origin ref except the excluded one.
+        # Filter out HEAD (symref, redundant with its target).
+        by_ancestry=$(git log --oneline "refs/heads/$branch" \
+            $(git for-each-ref --format='%(refname)' refs/remotes/origin/ \
+                | grep -Fxv "refs/remotes/origin/HEAD" \
+                | grep -Fxv "$exclude_ref" \
+                | sed 's/^/^/') 2>/dev/null)
+    else
+        by_ancestry=$(git log --oneline "refs/heads/$branch" --not --remotes=origin 2>/dev/null)
+    fi
     [ -z "$by_ancestry" ] && return 0  # all commits reachable — merged
 
     # Squash merge check: if all commits have patch equivalents in some remote
@@ -84,8 +103,10 @@ commits_unmerged() {
     # Skip remote refs that produce no cherry output (unrelated histories).
     # grep -Fv -- '->' filters out "origin/HEAD -> origin/main": after
     # tr -d ' ' it becomes "origin/HEAD->origin/main" and git cherry exits 128.
-    local remote_ref cherry_out
+    local remote_ref cherry_out exclude_short
+    exclude_short="${exclude_ref#refs/remotes/}"
     while IFS= read -r remote_ref; do
+        [ "$remote_ref" = "$exclude_short" ] && continue
         cherry_out=$(git cherry "$remote_ref" "$branch" 2>/dev/null)
         [ -z "$cherry_out" ] && continue           # no commits to compare — skip
         echo "$cherry_out" | grep -q '^+' && continue  # unmerged commits remain
@@ -157,6 +178,53 @@ remove_branch() {
     deleted_branches+=("$branch")
 }
 
+# remove_merged_remote_branch BRANCH WORKTREE_OR_EMPTY — delete remote branch,
+# then clean up local branch and worktree.  Called when the remote is still alive
+# but commits_unmerged confirms all work has landed.
+remove_merged_remote_branch() {
+    local branch=$1 wt=$2
+
+    # Guard: if the worktree is dirty and no work has been committed (branch
+    # tip matches a remote ref), the branch is active — uncommitted work is
+    # in flight.  Keep it and don't touch the remote.  This check must happen
+    # BEFORE deleting the remote, because remove_merged_worktree_branch relies
+    # on remote refs for the same detection and would misclassify otherwise.
+    if [ -n "$wt" ] && worktree_is_dirty "$wt"; then
+        local tip
+        tip=$(git rev-parse "refs/heads/$branch" 2>/dev/null)
+        while IFS= read -r remote_ref; do
+            if [ "$(git rev-parse "$remote_ref" 2>/dev/null)" = "$tip" ]; then
+                keep "$branch" "active" "(commit or stash first, then re-run git-gone)"
+                return 0
+            fi
+        done < <(git branch -r 2>/dev/null | tr -d ' ' | grep '^origin/' | grep -Fv -- '->')
+        # Tip doesn't match any remote ref — work was committed and landed,
+        # but worktree has additional uncommitted changes.  Fall through to
+        # delete the remote, then remove_merged_worktree_branch will keep it
+        # as "merged" with a force-delete hint.
+    fi
+
+    # Delete remote branch — abort entirely if this fails, so we don't
+    # delete local state while the remote survives.
+    if $dry_run; then
+        deleted_remote_branches+=("$branch")
+    else
+        if ! git push origin --delete "$branch" 2>/dev/null; then
+            keep "$branch" "in progress" \
+                "git push origin --delete $branch && git branch -D $branch"
+            return 0
+        fi
+        deleted_remote_branches+=("$branch")
+    fi
+
+    # Delegate local cleanup to existing helpers
+    if [ -n "$wt" ]; then
+        remove_merged_worktree_branch "$branch" "$wt"
+    else
+        remove_branch "$branch"
+    fi
+}
+
 # Current branch is always kept
 keep "$current" "current" ""
 
@@ -168,8 +236,12 @@ while read -r branch upstream; do
     if [ -n "$upstream" ]; then
         if [ "$upstream" = "refs/remotes/origin/$branch" ] \
                 && git show-ref --verify --quiet "$upstream" 2>/dev/null; then
-            # Own remote still alive — in progress
-            if [ -n "$wt" ]; then
+            # Own remote still alive — check if work has actually landed
+            unmerged=$(commits_unmerged "$branch" "refs/remotes/origin/$branch")
+            if [ -z "$unmerged" ]; then
+                # All commits merged — clean up remote + local
+                remove_merged_remote_branch "$branch" "$wt"
+            elif [ -n "$wt" ]; then
                 keep "$branch" "in progress" \
                     "git push origin --delete $branch && git worktree remove \"$wt\" && git branch -D $branch"
             else
@@ -184,10 +256,10 @@ while read -r branch upstream; do
         unmerged=$(commits_unmerged "$branch")
         if [ -n "$unmerged" ]; then
             if [ -n "$wt" ]; then
-                keep "$branch" "abandoned" \
+                keep "$branch" "unmatched" \
                     "git worktree remove --force \"$wt\" && git branch -D $branch"
             else
-                keep "$branch" "abandoned" "git branch -D $branch"
+                keep "$branch" "unmatched" "git branch -D $branch"
             fi
             continue
         fi
@@ -197,7 +269,12 @@ while read -r branch upstream; do
     else
         # No upstream tracking ref
         if git show-ref --verify --quiet "refs/remotes/origin/$branch" 2>/dev/null; then
-            if [ -n "$wt" ]; then
+            # Remote exists without tracking — check if work has landed
+            unmerged=$(commits_unmerged "$branch" "refs/remotes/origin/$branch")
+            if [ -z "$unmerged" ]; then
+                # All commits merged — clean up remote + local
+                remove_merged_remote_branch "$branch" "$wt"
+            elif [ -n "$wt" ]; then
                 keep "$branch" "in progress" \
                     "git push origin --delete $branch && git worktree remove \"$wt\" && git branch -D $branch"
             else
@@ -229,8 +306,18 @@ done < <(git for-each-ref --format='%(refname:short) %(upstream)' refs/heads/)
 if [ ${#deleted_branches[@]} -gt 0 ]; then
     verb="Deleted"; $dry_run && verb="Would delete"
     list=$(IFS=', '; echo "${deleted_branches[*]}")
-    printf "  ${BOLD}%s %d:${RST} ${DIM}%s${RST}\n\n" \
+    printf "  ${BOLD}%s %d:${RST} ${DIM}%s${RST}\n" \
         "$verb" "${#deleted_branches[@]}" "$list"
+fi
+
+if [ ${#deleted_remote_branches[@]} -gt 0 ]; then
+    rlist=$(IFS=', '; echo "${deleted_remote_branches[*]}")
+    rverb="Deleted remote"; $dry_run && rverb="Would delete remote"
+    printf "  ${BOLD}%s:${RST} ${DIM}%s${RST}\n" "$rverb" "$rlist"
+fi
+
+if [ ${#deleted_branches[@]} -gt 0 ] || [ ${#deleted_remote_branches[@]} -gt 0 ]; then
+    printf "\n"
 fi
 
 if [ ${#remaining_entries[@]} -gt 0 ]; then
@@ -267,7 +354,7 @@ if [ ${#remaining_entries[@]} -gt 0 ]; then
             current)       color="$CYAN"   ;;
             "in progress") color="$GREEN"  ;;
             active)        color="$GREEN"  ;;
-            abandoned)     color="$YELLOW" ;;
+            unmatched)     color="$YELLOW" ;;
             *)             color="$DIM"    ;;
         esac
 
