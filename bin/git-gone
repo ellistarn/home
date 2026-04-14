@@ -1,7 +1,7 @@
 #!/bin/bash
 # git-gone — delete branches whose work has landed; show what remains.
 #
-# Never removes a branch with unmerged local commits.
+# Never removes a branch with unmerged local or remote commits.
 # Never removes a worktree with uncommitted changes.
 # When in doubt, keeps the branch.
 #
@@ -70,17 +70,19 @@ get_worktree() {
 # keep BRANCH STATUS DELETE_CMD
 keep() { remaining_entries+=("${1}${SEP}${2}${SEP}${3}"); }
 
-# commits_unmerged BRANCH [EXCLUDE_REF] — print commits from BRANCH not yet
+# commits_unmerged REF [EXCLUDE_REF] — print commits from REF not yet
 # merged into any remote ref, accounting for both regular merges (ancestry)
 # and squash merges (patch equivalence via git cherry).  Empty output means
 # the branch is merged.
+#
+# REF is any valid git ref (e.g. refs/heads/foo or refs/remotes/origin/foo).
 #
 # When EXCLUDE_REF is given (e.g. refs/remotes/origin/$branch), that ref is
 # excluded from both the ancestry and cherry checks.  This prevents a branch's
 # own remote from self-satisfying the "merged" check — used when the remote
 # is still alive and we need to know if commits landed on a DIFFERENT branch.
 commits_unmerged() {
-    local branch=$1
+    local ref=$1
     local exclude_ref=${2:-}
 
     # Fast path: ancestry check — works for regular merges.
@@ -88,13 +90,13 @@ commits_unmerged() {
     if [ -n "$exclude_ref" ]; then
         # Build explicit ^ref args for every origin ref except the excluded one.
         # Filter out HEAD (symref, redundant with its target).
-        by_ancestry=$(git log --oneline "refs/heads/$branch" \
+        by_ancestry=$(git log --oneline "$ref" \
             $(git for-each-ref --format='%(refname)' refs/remotes/origin/ \
                 | grep -Fxv "refs/remotes/origin/HEAD" \
                 | grep -Fxv "$exclude_ref" \
                 | sed 's/^/^/') 2>/dev/null)
     else
-        by_ancestry=$(git log --oneline "refs/heads/$branch" --not --remotes=origin 2>/dev/null)
+        by_ancestry=$(git log --oneline "$ref" --not --remotes=origin 2>/dev/null)
     fi
     [ -z "$by_ancestry" ] && return 0  # all commits reachable — merged
 
@@ -107,7 +109,7 @@ commits_unmerged() {
     exclude_short="${exclude_ref#refs/remotes/}"
     while IFS= read -r remote_ref; do
         [ "$remote_ref" = "$exclude_short" ] && continue
-        cherry_out=$(git cherry "$remote_ref" "$branch" 2>/dev/null)
+        cherry_out=$(git cherry "$remote_ref" "$ref" 2>/dev/null)
         [ -z "$cherry_out" ] && continue           # no commits to compare — skip
         echo "$cherry_out" | grep -q '^+' && continue  # unmerged commits remain
         return 0  # all commits matched — squash merged
@@ -236,10 +238,15 @@ while read -r branch upstream; do
     if [ -n "$upstream" ]; then
         if [ "$upstream" = "refs/remotes/origin/$branch" ] \
                 && git show-ref --verify --quiet "$upstream" 2>/dev/null; then
-            # Own remote still alive — check if work has actually landed
-            unmerged=$(commits_unmerged "$branch" "refs/remotes/origin/$branch")
+            # Own remote still alive — check if work has actually landed.
+            # Check BOTH local and remote refs: the local branch may be stale
+            # (e.g. worktree reset it to base) while the remote has real work.
+            unmerged=$(commits_unmerged "refs/heads/$branch" "refs/remotes/origin/$branch")
             if [ -z "$unmerged" ]; then
-                # All commits merged — clean up remote + local
+                unmerged=$(commits_unmerged "refs/remotes/origin/$branch" "refs/remotes/origin/$branch")
+            fi
+            if [ -z "$unmerged" ]; then
+                # All commits merged on both local and remote — clean up
                 remove_merged_remote_branch "$branch" "$wt"
             elif [ -n "$wt" ]; then
                 keep "$branch" "in progress" \
@@ -253,7 +260,7 @@ while read -r branch upstream; do
 
         # Remote gone (or upstream is a base branch, not own remote) —
         # check for unmerged local commits (handles squash merges)
-        unmerged=$(commits_unmerged "$branch")
+        unmerged=$(commits_unmerged "refs/heads/$branch")
         if [ -n "$unmerged" ]; then
             if [ -n "$wt" ]; then
                 keep "$branch" "unmatched" \
@@ -269,10 +276,15 @@ while read -r branch upstream; do
     else
         # No upstream tracking ref
         if git show-ref --verify --quiet "refs/remotes/origin/$branch" 2>/dev/null; then
-            # Remote exists without tracking — check if work has landed
-            unmerged=$(commits_unmerged "$branch" "refs/remotes/origin/$branch")
+            # Remote exists without tracking — check if work has landed.
+            # Check BOTH local and remote refs: the local branch may be stale
+            # (e.g. worktree reset it to base) while the remote has real work.
+            unmerged=$(commits_unmerged "refs/heads/$branch" "refs/remotes/origin/$branch")
             if [ -z "$unmerged" ]; then
-                # All commits merged — clean up remote + local
+                unmerged=$(commits_unmerged "refs/remotes/origin/$branch" "refs/remotes/origin/$branch")
+            fi
+            if [ -z "$unmerged" ]; then
+                # All commits merged on both local and remote — clean up
                 remove_merged_remote_branch "$branch" "$wt"
             elif [ -n "$wt" ]; then
                 keep "$branch" "in progress" \
@@ -285,7 +297,7 @@ while read -r branch upstream; do
         fi
 
         # No upstream, no remote — check if work landed (handles squash merges)
-        unmerged=$(commits_unmerged "$branch")
+        unmerged=$(commits_unmerged "refs/heads/$branch")
         if [ -n "$unmerged" ]; then
             if [ -n "$wt" ]; then
                 keep "$branch" "local" \
