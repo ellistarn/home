@@ -22,11 +22,12 @@ A design divides every concern into one of three zones:
   capability.
 - [ ] Boundaries are explicit and falsifiable. Every concern the reader would expect is committed to,
   delegated, or scoped out. Each commitment can be concretely violated.
+- [ ] Every element — examples, diagrams, sections — contributes to a cohesive story.
 - [ ] Names improve intuitive understanding of the system. A reader encountering a name should
   correctly guess its purpose.
-- [ ] Concepts are explained before they are referenced.
-- [ ] The interface is shown before the explanation.
+- [ ] Concepts are introduced before they are referenced.
+- [ ] Concrete artifacts — interfaces, examples, schemas — carry the design. Prose orients the reader
+  between them.
 - [ ] Factual claims are verified.
-- [ ] Rejected alternatives have reasons and appear at the end.
-- [ ] Every example is relevant to the design's story.
+- [ ] Rejected alternatives appear at the end.
 - [ ] Every word has weight. No dramatic language, no filler.
