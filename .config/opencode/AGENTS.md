@@ -1,1 +1,2 @@
 - Work in .worktrees/$(date +%m%dT%H%M)-$RANDOM-<task>. Do not forget this!!
+- Think about the why behind what I am saying and apply it as you work

@@ -23,7 +23,8 @@
         "/Users/etarn/go/bin/muse",
         "listen"
       ],
-      "enabled": true
+      "enabled": true,
+      "timeout": 120000
     }
   },
   "instructions": [],
@@ -38,7 +39,8 @@
   },
   "skills": {
     "paths": [
-      "~/.skills"
+      "~/.skills",
+      ".skills"
     ]
   }
 }
