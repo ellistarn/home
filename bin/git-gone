@@ -5,8 +5,10 @@
 #
 #   is_dirty(worktree)   — tracked modifications (staged or unstaged).
 #                          Untracked files are not evidence of active work.
-#   work_landed(branch)  — all commits reachable by ancestry, or
-#                          patch-equivalent on a remote branch (squash merges).
+#   work_landed(branch)  — all commits reachable by ancestry, patch-
+#                          equivalent (git cherry), tree-equivalent
+#                          (merge-tree simulation), or subject-matched
+#                          (commit message modulo GitHub's PR suffix).
 #
 #   Decision table:
 #     dirty              → keep  (hint: force-delete command)
@@ -65,7 +67,8 @@ is_dirty() {
 
 # unlanded_commits REF [EXCLUDE_REF] — print commits from REF not yet
 # landed on any remote branch across all remotes (empty = all landed).
-# Uses ancestry first, then patch equivalence (git cherry) for squash merges.
+# Uses ancestry first, then patch equivalence (git cherry) for squash merges,
+# then merge-tree simulation and commit message matching as fallbacks.
 # EXCLUDE_REF prevents a branch's own remote from self-satisfying the check.
 unlanded_commits() {
     local ref=$1 exclude_ref=${2:-}
@@ -83,7 +86,9 @@ unlanded_commits() {
     fi
     [ -z "$by_ancestry" ] && return 0
 
-    # Slow path: patch equivalence via git cherry — covers squash merges.
+    # Slow path: patch equivalence via git cherry — covers squash merges
+    # where a single commit was cherry-picked or squash-merged with the
+    # same diff context (branch base == squash commit parent).
     local remote_ref cherry_out exclude_short="${exclude_ref#refs/remotes/}"
     while IFS= read -r remote_ref; do
         [ "$remote_ref" = "$exclude_short" ] && continue
@@ -91,6 +96,44 @@ unlanded_commits() {
         [ -z "$cherry_out" ] && continue
         echo "$cherry_out" | grep -q '^+' && continue
         return 0
+    done < <(git branch -r 2>/dev/null | tr -d ' ' | grep -Fv -- '->')
+
+    # Squash merge detection — git cherry compares per-commit patch-ids,
+    # which fails for multi-commit squash merges (combined diff != any
+    # individual commit) and single commits with shifted context (other
+    # work landed between branch fork and squash merge, changing the diff).
+    #
+    # Extract the first (chronological) branch commit subject for message
+    # matching.  GitHub squash merges use the PR title — typically the
+    # first commit's subject — with " (#N)" appended.  Using only one
+    # subject minimizes false positives from common messages like "fix lint".
+    # by_ancestry format: git log --oneline (newest first): "<hash> <subject>"
+    local squash_subject
+    squash_subject=$(echo "$by_ancestry" | tail -1)
+    squash_subject="${squash_subject#* }"
+
+    local result_tree target_tree merge_base target_msgs
+    while IFS= read -r remote_ref; do
+        [ "$remote_ref" = "$exclude_short" ] && continue
+
+        # merge-tree: simulate merging branch into target.  If the result
+        # tree equals the target's tree, the branch adds nothing new.
+        # Requires git 2.38+; degrades gracefully (falls through).
+        if result_tree=$(git merge-tree --write-tree "$remote_ref" "$ref" 2>/dev/null); then
+            target_tree=$(git rev-parse "${remote_ref}^{tree}" 2>/dev/null) || true
+            [ "$result_tree" = "$target_tree" ] && return 0
+        fi
+
+        # Commit message: GitHub squash merges use the PR title (typically
+        # a branch commit's subject) with " (#N)" appended.  Match the
+        # first branch commit subject against recent target commits modulo
+        # that suffix.  -200 caps the graph walk for large ranges.
+        [ -z "$squash_subject" ] && continue
+        merge_base=$(git merge-base "$remote_ref" "$ref" 2>/dev/null) || continue
+        target_msgs=$(git log -200 --format=%s "$merge_base".."$remote_ref" 2>/dev/null \
+            | sed 's/ (#[0-9]*)$//')
+        [ -z "$target_msgs" ] && continue
+        echo "$target_msgs" | grep -qFx "$squash_subject" && return 0
     done < <(git branch -r 2>/dev/null | tr -d ' ' | grep -Fv -- '->')
 
     echo "$by_ancestry"
