@@ -59,7 +59,7 @@ The system's runtime behavior is understandable from its outputs.
 
 Integration tests survive refactors, unit tests don't. Push coverage to the edges.
 
-- [ ] Tests span the system and dependencies as practically as possible
+- [ ] Tests are as end to end as is practical -- e2e > unit
 - [ ] Correctness tests cover happy paths and edge cases
 - [ ] Fault injection tests exercise error paths
 - [ ] Regression tests accompany bug fixes — named Test<Feature>_Regression<Desc>, colocated with the feature they guard

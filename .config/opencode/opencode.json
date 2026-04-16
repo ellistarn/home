@@ -32,11 +32,7 @@
     "builder-mcp_*": true,
     "ellis_*": true
   },
-  "agent": {
-    "plan": {
-      "prompt": "{file:~/.muse/muse.md}"
-    }
-  },
+  "agent": {},
   "skills": {
     "paths": [
       "~/.skills",
