@@ -12,7 +12,7 @@ programmatically, verify. Items that require human confirmation, ask.
 
 - [ ] **Rebased** — PR branch is rebased to the latest commit on the target remote branch.
 - [ ] **Designs updated** — Design gaps and proposed updates have been reviewed by the human.
-- [ ] **Implementation Quality** — If implementing, load reconciling-implementations and execute the checklist
+- [ ] **Implementation Quality** — If implementing, load the reconciling-implementations skill and execute the checklist
 - [ ] **Design Quality** - If designing, load declaring-designs and execute the checklist
 - [ ] **Validated** — The change works correctly in a development environment, if applicable.
 - [ ] **Committed** — Branch has a single commit. The message summarizes the change clearly — show not tell for perf improvements, logging changes, or anything measurable.
