@@ -75,6 +75,7 @@ Code's textual surface should not require invisible context to interpret correct
 - [ ] Feature-specific packages compose feature-agnostic packages — dependencies point from features to primitives, never the reverse
 - [ ] Every abstraction earns its existence — no indirection without capability
 - [ ] No duplicated code — small conceptual differences are unified, not copy-pasted
+- [ ] Every dependency earns its place — not superseded by stdlib, not redundant with another dep, not disproportionate to its usage
 - [ ] Types encode constraints — enums for closed sets, no unimplemented API fields
 - [ ] Validation is as far forward as possible — reject invalid state at the boundary
 - [ ] Initialization is pulled to program start — no lazy setup buried in the call stack
