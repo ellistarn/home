@@ -31,6 +31,7 @@ path+=($HOME/.local/bin)
 path+=(/opt/homebrew/bin)
 path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
 path+=($HOME/go/bin)
+path+=(/opt/homebrew/opt/python@3.14/libexec/bin)
 path+=($HOME/.cargo/bin)
 path+=($HOME/.bun/bin)
 path+=(/usr/local/go/bin)
