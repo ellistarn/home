@@ -6,7 +6,9 @@ description: Completion checklist. Load before declaring any task complete.
 # Finish
 
 Before work is declared complete, verify every item. Items that can be verified
-programmatically, verify. Items that require human confirmation, ask.
+programmatically, verify — run the command and show output. Items that require
+loading another skill, load it with the skill tool and execute its full checklist
+before checking the box. Do not check any box without evidence.
 
 ## Checklist
 
