@@ -1,33 +1,40 @@
 {
-  "$schema" : "https://opencode.ai/config.json",
-  "plugin" : [ "opencode-wakelock" ],
-  "model" : "amazon-bedrock/us.anthropic.claude-opus-4-6",
-  "default_agent" : "plan",
-  "permission" : {
-    "external_directory" : {
-      "~/go/src/github.com/ellistarn/**" : "allow"
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-wakelock"],
+  "model": "amazon-bedrock/us.anthropic.claude-opus-4-6",
+  "default_agent": "plan",
+  "permission": {
+    "external_directory": {
+      "~/go/src/github.com/ellistarn/**": "allow"
     }
   },
-  "mcp" : {
-    "builder-mcp" : {
-      "type" : "local",
-      "command" : [ "/Users/etarn/.toolbox/bin/builder-mcp", "--include-tools", "InternalCodeSearch,InternalSearch,ReadInternalWebsites,WorkspaceSearch,WorkspaceGitDetails,BrazilBuildAnalyzerTool" ],
-      "enabled" : false
+  "mcp": {
+    "builder-mcp": {
+      "type": "local",
+      "command": [
+        "/Users/etarn/.toolbox/bin/builder-mcp",
+        "--include-tools",
+        "InternalCodeSearch,InternalSearch,ReadInternalWebsites,WorkspaceSearch,WorkspaceGitDetails,BrazilBuildAnalyzerTool"
+      ],
+      "enabled": false
     },
-    "ellis" : {
-      "type" : "local",
-      "command" : [ "/Users/etarn/go/bin/muse", "listen" ],
-      "enabled" : true,
-      "timeout" : 120000
+    "ellis": {
+      "type": "local",
+      "command": ["/Users/etarn/go/bin/muse", "listen"],
+      "enabled": true,
+      "timeout": 120000,
+      "environment": {
+        "MUSE_MODEL": "us.anthropic.claude-opus-4-6-v1"
+      }
     }
   },
-  "instructions" : [ ],
-  "tools" : {
-    "builder-mcp_*" : true,
-    "ellis_*" : true
+  "instructions": [],
+  "tools": {
+    "builder-mcp_*": true,
+    "ellis_*": true
   },
-  "agent" : { },
-  "skills" : {
-    "paths" : [ "~/.skills", ".skills" ]
+  "agent": {},
+  "skills": {
+    "paths": ["~/.skills", ".skills"]
   }
 }

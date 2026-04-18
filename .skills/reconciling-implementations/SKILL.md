@@ -21,6 +21,8 @@ When design commitments conflict with each other, surface the tension to the hum
 prioritize one. When the implementation diverges from the design, classify the gap: implementation is
 wrong (fix the code) or design is stale (surface to the human).
 
+Think hard while you execute the relevant checklist(s).
+
 ## Checklist
 
 ### Correctness
@@ -40,6 +42,7 @@ Measure and budget runtime cost — work backwards from profiling and benchmarks
 consumption compounds.
 
 - [ ] Algorithmic complexity is optimal
+- [ ] Code has been profiled
 - [ ] Hot-path allocations and complexity are justified — no unnecessary copies, conversions, or O(n²) where O(n) suffices
 - [ ] End-to-end benchmarks are committed and don't meaningfully regress
 - [ ] Memory footprint is justified — only store and copy what's needed
