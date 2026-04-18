@@ -1,2 +1,2 @@
-- Work in .worktrees/$(date +%m%dT%H%M)-$RANDOM-<task>. Do not forget this!!
-- Think about the why behind what I am saying and apply it as you work
+- Work in .worktrees/<branch>. Name branches as $(date +%m%dT%H%M)-$RANDOM-<task>. The worktree directory name must equal the branch name. Do not forget this!!
+- If you start speculating, stop, and find a way to cheaply validate your assumptions
