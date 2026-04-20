@@ -56,6 +56,8 @@ bin/.*
 !.config/opencode/AGENTS.md
 !.config/opencode/commands
 !.config/opencode/commands/*.md
+!.config/opencode/agents
+!.config/opencode/agents/*.md
 !.config/opencode/skills
 !.config/opencode/skills/**
 
