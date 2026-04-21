@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenCode dev server
+After=network.target
+
+[Service]
+Type=simple
+User=etarn
+WorkingDirectory=/home/etarn
+ExecStart=/home/etarn/.opencode/bin/opencode serve --port 9000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

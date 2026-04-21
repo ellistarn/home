@@ -1,5 +1,8 @@
 #!/bin/bash -eu
 # Sets up dev tunnel: *.etarn resolves and routes to dev desk via SSH.
+# macOS only.
+
+[[ "$(uname)" == "Darwin" ]] || { echo "Skipping (not macOS)"; exit 0; }
 #   - dnsmasq: *.etarn → 127.0.0.1
 #   - pfctl: redirect port 80 → $DEV_DESKTOP_TUNNEL_PORT on loopback
 #   - login.sh: SSH LocalForward $DEV_DESKTOP_TUNNEL_PORT → dev desk (auto-starts)
