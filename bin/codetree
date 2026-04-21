@@ -1,0 +1,64 @@
+#!/bin/bash
+# codetree — launch opencode inside a fresh (or existing) git worktree.
+#
+#   codetree                      # new worktree, auto-named <mmddThhmm>-<rand>
+#   codetree <name>               # enter or create <name>
+#   codetree <name> -- <oc-args>  # pass-through args to opencode
+#   codetree -- <oc-args>         # auto-named, with opencode args
+#
+# Worktrees live at $repo_root/.worktrees/<name> on branch <name>, branched
+# off current HEAD.  Sessions are ephemeral; worktrees are durable.  Cleanup
+# is handled by git-gone when the branch lands.
+set -euo pipefail
+
+# ── Arg parse ────────────────────────────────────────────────────────────
+# First positional that isn't a flag is the worktree name.  Everything
+# after that (with or without a leading --) is forwarded to opencode.
+name=""
+oc_args=()
+if [ $# -gt 0 ] && [[ "$1" != -* ]]; then
+    name=$1
+    shift
+fi
+if [ "${1:-}" = "--" ]; then
+    shift
+fi
+oc_args=("$@")
+
+# ── Repo context ─────────────────────────────────────────────────────────
+if ! repo_root=$(git rev-parse --show-toplevel 2>/dev/null); then
+    echo "codetree: not inside a git repository" >&2
+    exit 1
+fi
+
+# Reject linked worktrees: git-dir and git-common-dir diverge there.
+git_dir=$(cd "$(git rev-parse --git-dir)" && pwd -P)
+common_dir=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+if [ "$git_dir" != "$common_dir" ]; then
+    echo "codetree: already inside a linked worktree; cd to main checkout first" >&2
+    exit 1
+fi
+
+# ── Name + path ──────────────────────────────────────────────────────────
+if [ -z "$name" ]; then
+    name="$(date +%m%dT%H%M)-$RANDOM"
+fi
+worktree_path="$repo_root/.worktrees/$name"
+
+# ── Create or enter ──────────────────────────────────────────────────────
+# An existing dir is only trusted if git recognizes it as a linked
+# worktree — guards against leftover dirs from a hard-removed worktree.
+if [ -d "$worktree_path" ] && \
+   git worktree list --porcelain | grep -qxF "worktree $worktree_path"; then
+    :   # already set up — just enter
+elif git show-ref --verify --quiet "refs/heads/$name"; then
+    # branch exists but no worktree — attach a worktree to it
+    git worktree add "$worktree_path" "$name"
+else
+    # brand-new: create worktree + branch off current HEAD
+    git worktree add "$worktree_path" -b "$name"
+fi
+
+cd "$worktree_path"
+# ${arr[@]+"${arr[@]}"} avoids "unbound variable" under `set -u` for empty arrays.
+exec opencode ${oc_args[@]+"${oc_args[@]}"}
