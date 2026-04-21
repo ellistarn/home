@@ -9,18 +9,62 @@
 #                          equivalent (git cherry), tree-equivalent
 #                          (merge-tree simulation), or subject-matched
 #                          (commit message modulo GitHub's PR suffix).
+#   is_stale(branch, wt) — max(worktree mtime, branch tip committer date)
+#                          is older than $stale_hours.  Only consulted in
+#                          --stale mode.
 #
 #   Decision table:
-#     dirty              → keep  (hint: force-delete command)
-#     clean + landed     → delete {branch, worktree, remote} atomically
-#     clean + not landed → keep  (hint: delete command)
+#     dirty                           → keep  (hint: force-delete command)
+#     clean + landed                  → delete {branch, worktree, remote}
+#     clean + stale (--stale only)    → delete {branch, worktree};
+#                                       pushed remote surfaced for manual
+#                                       cleanup (no landed-verification
+#                                       safety net to auto-delete it)
+#     clean + not landed + not stale  → keep  (hint: delete command)
 #
-#   Branches not in the table were auto-deleted (work confirmed landed,
-#   worktree absent or clean).
+#   Branches not in the table were auto-deleted (work confirmed landed or
+#   stale, worktree absent or clean).
+#
+# Flags:
+#   -n, --dry-run        show what would happen, change nothing
+#   --stale [HOURS]      also delete branches idle > HOURS (default 24);
+#                        local branch + worktree only, pushed remote
+#                        listed under "Orphaned remotes" for you to
+#                        delete manually if desired
 set -euo pipefail
 
 dry_run=false
-[ "${1:-}" = "-n" ] || [ "${1:-}" = "--dry-run" ] && dry_run=true
+stale_mode=false
+stale_hours=24
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -n|--dry-run)
+            dry_run=true
+            shift
+            ;;
+        --stale)
+            stale_mode=true
+            shift
+            # Optional numeric arg for hours.  Consume if next token is not
+            # another flag; error if present but non-numeric.
+            if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then
+                if [[ "$1" =~ ^[0-9]+$ ]]; then
+                    stale_hours=$1
+                    shift
+                else
+                    echo "git-gone: --stale expects hours (integer), got: $1" >&2
+                    exit 1
+                fi
+            fi
+            ;;
+        *)
+            echo "git-gone: unknown argument: $1" >&2
+            echo "usage: git-gone [-n|--dry-run] [--stale [HOURS]]" >&2
+            exit 1
+            ;;
+    esac
+done
 
 # Must be in main worktree
 [ "$(git rev-parse --git-dir)" = ".git" ] || {
@@ -37,9 +81,10 @@ else
 fi
 
 SEP=$'\x1f'
-remaining=()     # "branch${SEP}status${SEP}hint"
+remaining=()         # "branch${SEP}status${SEP}hint"
 deleted=()
 deleted_remote=()
+orphaned_remotes=()  # stale-deleted locally but remote survives
 
 printf "Fetching..."
 git fetch --all -p -q
@@ -63,6 +108,36 @@ has_remote() {
 
 is_dirty() {
     [ -n "$(git -C "$1" status --porcelain -uno 2>/dev/null)" ]
+}
+
+# is_stale BRANCH WORKTREE THRESHOLD_HOURS — true if max(worktree mtime,
+# branch tip committer date) is older than THRESHOLD_HOURS.  Worktree
+# mtime catches top-level directory activity (worktree creation, files
+# added or removed at the root); tip date catches branches with committed
+# work.  File edits inside subdirectories don't bump the top-level mtime
+# — the is_dirty check in front of --stale protects uncommitted edits,
+# and committed work bumps the tip.  The residual gap is "clean tree,
+# no new commits, reads only" which is acceptably classified as idle.
+is_stale() {
+    local branch=$1 wt=$2 threshold_hours=$3
+    local now tip_time wt_time max_time threshold_seconds
+
+    now=$(date +%s)
+    tip_time=$(git log -1 --format=%ct "refs/heads/$branch" 2>/dev/null || echo 0)
+
+    wt_time=0
+    if [ -n "$wt" ] && [ -d "$wt" ]; then
+        # -c: GNU stat, -f: BSD stat.  Fall back to 0 on both failures.
+        wt_time=$(stat -c %Y "$wt" 2>/dev/null || stat -f %m "$wt" 2>/dev/null || echo 0)
+    fi
+
+    max_time=$tip_time
+    [ "$wt_time" -gt "$max_time" ] && max_time=$wt_time
+
+    # Compare in seconds to avoid hour-truncation off-by-one
+    # (--stale 24 should trip at 24h exactly, not 25h).
+    threshold_seconds=$(( threshold_hours * 3600 ))
+    [ "$(( now - max_time ))" -gt "$threshold_seconds" ]
 }
 
 # unlanded_commits REF [EXCLUDE_REF] — print commits from REF not yet
@@ -166,18 +241,21 @@ work_landed() {
     return 0
 }
 
-# delete_all BRANCH WORKTREE HAS_REMOTE — remove the {branch, worktree,
-# remote} triplet atomically.  Remote first; abort on failure.
+# delete_all BRANCH WORKTREE HAS_REMOTE [DELETE_REMOTE] — remove the
+# {branch, worktree, remote} triplet atomically.  Remote first; abort on
+# failure.  DELETE_REMOTE (default: $HAS_REMOTE) lets callers preserve
+# the remote even when present (stale-mode uses this).
 delete_all() {
     local branch=$1 wt=$2 has_remote=$3
+    local delete_remote=${4:-$has_remote}
 
     if $dry_run; then
         deleted+=("$branch")
-        $has_remote && deleted_remote+=("$branch")
+        $delete_remote && deleted_remote+=("$branch")
         return 0
     fi
 
-    if $has_remote; then
+    if $delete_remote; then
         if ! git push origin --delete "$branch" 2>/dev/null; then
             return 1
         fi
@@ -226,6 +304,17 @@ while read -r branch _; do
             keep "$branch" "landed" \
                 "(remote delete failed) $(build_hint "$branch" "$wt" $remote)"
         fi
+    # Stale? → delete local branch + worktree; preserve the remote (if
+    # any) and surface it separately for manual cleanup.  Landed still
+    # takes priority, so a stale-AND-landed branch goes through landed's
+    # full triplet delete above.
+    elif $stale_mode && is_stale "$branch" "$wt" "$stale_hours"; then
+        if ! delete_all "$branch" "$wt" $remote false; then
+            keep "$branch" "stale" \
+                "(delete failed) $(build_hint "$branch" "$wt" $remote)"
+        elif $remote; then
+            orphaned_remotes+=("$branch")
+        fi
     else
         keep "$branch" "not landed" "$(build_hint "$branch" "$wt" $remote)"
     fi
@@ -243,7 +332,13 @@ if [ ${#deleted_remote[@]} -gt 0 ]; then
     printf "  ${BOLD}%s:${RST} ${DIM}%s${RST}\n" \
         "$rverb" "$(IFS=', '; echo "${deleted_remote[*]}")"
 fi
-[ ${#deleted[@]} -gt 0 ] || [ ${#deleted_remote[@]} -gt 0 ] && printf "\n"
+if [ ${#orphaned_remotes[@]} -gt 0 ]; then
+    printf "  ${BOLD}Orphaned remotes (%d):${RST} ${DIM}local gone, remote survives${RST}\n" \
+        "${#orphaned_remotes[@]}"
+    printf "  ${YELLOW}git push origin --delete %s${RST}\n" \
+        "$(IFS=' '; echo "${orphaned_remotes[*]}")"
+fi
+[ ${#deleted[@]} -gt 0 ] || [ ${#deleted_remote[@]} -gt 0 ] || [ ${#orphaned_remotes[@]} -gt 0 ] && printf "\n"
 
 if [ ${#remaining[@]} -gt 0 ]; then
     w_b=6 w_s=10
@@ -265,6 +360,7 @@ if [ ${#remaining[@]} -gt 0 ]; then
             dirty)         c="$YELLOW" ;;
             "not landed")  c="$GREEN"  ;;
             landed)        c="$YELLOW" ;;
+            stale)         c="$YELLOW" ;;
             *)             c="$DIM"    ;;
         esac
         [ -z "$d" ] && d="(currently checked out)"
