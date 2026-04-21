@@ -1,0 +1,53 @@
+# Dev-hosting helpers for the *.etarn setup.
+#
+# Client (macOS): type `<name>.etarn` as a command to attach the opencode TUI
+# to that backend via the SSH tunnel kept up by bin/login.sh. Works for any
+# subdomain that Caddy on the desktop is configured to route.
+#
+# Desktop (Linux): `<name>.etarn` as a command ALSO attaches — via the local
+# Caddy on 127.0.0.1:$DEV_DESKTOP_TUNNEL_PORT (no tunnel needed).
+# `c-setup`, `c-status`, `c-logs`, `c-restart` are convenience wrappers over
+# the sudoers-gated systemctl calls installed by bin/host-setup.
+
+export OPENCODE_DOMAIN_SUFFIX="${OPENCODE_DOMAIN_SUFFIX:-etarn}"
+
+# ----- *.etarn command hook -----------------------------------------------
+# zsh: command_not_found_handler. When a command ends in ".$OPENCODE_DOMAIN_SUFFIX",
+# route it to opencode attach against the Caddy proxy port.
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+  command_not_found_handler() {
+    if [[ "$1" == *.${OPENCODE_DOMAIN_SUFFIX} ]]; then
+      local host="$1" port="${DEV_DESKTOP_TUNNEL_PORT:-9847}"
+      shift
+      command opencode attach "http://${host}:${port}" "$@"
+      return $?
+    fi
+    print -r -- "zsh: command not found: $1" >&2
+    return 127
+  }
+fi
+
+# ----- Desktop-only: fleet control ----------------------------------------
+# The sudoers drop-in from bin/host-setup makes these passwordless for
+# caddy.service and opencode-home.service only.
+if [[ "$(uname)" == "Linux" && -f /etc/systemd/system/caddy.service ]]; then
+  alias c-setup='"$HOME"/bin/setup/dev-proxy.sh'
+  alias c-status='sudo systemctl status caddy.service opencode-home.service --no-pager'
+
+  c-logs() {
+    case "${1:-caddy}" in
+      caddy) sudo journalctl -u caddy.service -f ;;
+      home)  sudo journalctl -u opencode-home.service -f ;;
+      *)     echo "usage: c-logs [caddy|home]" >&2; return 64 ;;
+    esac
+  }
+
+  c-restart() {
+    case "${1:-all}" in
+      caddy) sudo systemctl restart caddy.service ;;
+      home)  sudo systemctl restart opencode-home.service ;;
+      all)   sudo systemctl restart caddy.service opencode-home.service ;;
+      *)     echo "usage: c-restart [caddy|home|all]" >&2; return 64 ;;
+    esac
+  }
+fi

@@ -1,0 +1,6 @@
+{
+  "_comment": "Caddy + backend registry for the *.etarn dev hosting setup, managed by bin/host-setup. 'home' is always present (opencode-home.service, port 4099). Additional backends are registered here as name: port pairs; you launch the actual process on that port yourself (tmux/systemd/whatever). Caddy routes <name>.<domain_suffix>:<proxy_port> -> 127.0.0.1:<port>. proxy_port must match DEV_DESKTOP_TUNNEL_PORT in .zshrc.",
+  "proxy_port": 9847,
+  "domain_suffix": "etarn",
+  "backends": {}
+}
