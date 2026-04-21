@@ -8,10 +8,15 @@
 # Requires DEV_DESKTOP_HOST to be set (e.g. in .zshrc).
 
 DOMAIN="etarn"
-PORT="${DEV_DESKTOP_TUNNEL_PORT:-9847}"
+PORT="${DEV_DESKTOP_TUNNEL_PORT:-}"
 
 if [[ -z "${DEV_DESKTOP_HOST:-}" ]]; then
   echo "ERROR: DEV_DESKTOP_HOST is not set"
+  exit 1
+fi
+
+if [[ -z "$PORT" ]]; then
+  echo "ERROR: DEV_DESKTOP_TUNNEL_PORT is not set"
   exit 1
 fi
 
