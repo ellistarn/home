@@ -20,7 +20,7 @@
     },
     "ellis": {
       "type": "local",
-      "command": ["/Users/etarn/go/bin/muse", "listen"],
+      "command": ["{env:HOME}/go/bin/muse", "listen"],
       "enabled": true,
       "timeout": 120000,
       "environment": {
