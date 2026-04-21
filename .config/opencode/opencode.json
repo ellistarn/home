@@ -33,8 +33,5 @@
     "builder-mcp_*": true,
     "ellis_*": true
   },
-  "agent": {},
-  "skills": {
-    "paths": ["~/.skills", ".skills"]
-  }
+  "agent": {}
 }
