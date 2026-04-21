@@ -1,2 +1,3 @@
 - Work in .worktrees/<branch>. Name branches as $(date +%m%dT%H%M)-$RANDOM-<task>. The worktree directory name must equal the branch name. Do not forget this!!
+- Talk to me about algorithms not the code. I do not read the code
 - If you start speculating, stop, and find a way to cheaply validate your assumptions
