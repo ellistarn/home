@@ -74,7 +74,7 @@ Integration tests survive refactors, unit tests don't. Push coverage to the edge
 
 Code's textual surface should not require invisible context to interpret correctly.
 
-- [ ] No dead code or unreachable branches
+- [ ] Identify hacks and shortcuts and eliminate them. Model concepts as they are naturally.
 - [ ] Feature-specific packages compose feature-agnostic packages — dependencies point from features to primitives, never the reverse
 - [ ] Every abstraction earns its existence — no indirection without capability
 - [ ] No duplicated code — small conceptual differences are unified, not copy-pasted
@@ -84,5 +84,6 @@ Code's textual surface should not require invisible context to interpret correct
 - [ ] Initialization is pulled to program start — no lazy setup buried in the call stack
 - [ ] Names are accurate and concise — no stuttering, no misleading verbs
 - [ ] Each concept has exactly one name, used consistently across every surface
+- [ ] No dead code or unreachable branches
 - [ ] Comments trace decisions to designs where applicable — no stale comments, no commented-out code
 - [ ] Think deeply about other simplicity opportunities we might have missed
