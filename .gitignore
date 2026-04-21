@@ -49,6 +49,10 @@ bin/.*
 !.skills
 !.skills/**
 
+# code-server
+!.config/code-server
+!.config/code-server/config.yaml
+
 # OpenCode
 !.config
 !.config/opencode
