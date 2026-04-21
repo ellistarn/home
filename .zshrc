@@ -49,6 +49,7 @@ done
 path+=($HOME/.toolbox/bin)
 export AWS_ACCOUNT_ID=767520670908
 export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-45df6bed.us-west-2.amazon.com
+export DEV_DESKTOP_TUNNEL_PORT=9847
 ~/bin/login.sh --check
 
 # Github
