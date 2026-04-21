@@ -1,0 +1,184 @@
+#!/bin/bash
+# worktree — create or resume a remote git worktree and attach via opencode.
+#
+#   worktree                        # pick from existing worktrees
+#   worktree <path>                 # new worktree, auto-named
+#   worktree <path> <name>          # reattach to existing worktree
+#
+# Accepts full local paths (~/go/src/...) which are translated to remote
+# paths by replacing $HOME with $REMOTE_HOME. Worktrees live at
+# <repo>/.worktrees/<name> on branch <name>.
+# Cleanup is handled by git-gone when the branch lands.
+set -euo pipefail
+
+OPENCODE_URL="http://opencode.etarn"
+SSH_HOST="${DEV_DESKTOP_HOST:?DEV_DESKTOP_HOST is not set}"
+REMOTE_HOME_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/worktree-remote-home"
+
+die() { echo "worktree: $*" >&2; exit 1; }
+
+# Resolve and cache the remote physical home directory.
+# git outputs symlink-resolved paths, so we need the physical path.
+resolve_remote_home() {
+    if [[ -n "${REMOTE_HOME:-}" ]]; then
+        echo "$REMOTE_HOME"
+        return
+    fi
+    if [[ -f "$REMOTE_HOME_CACHE" ]]; then
+        cat "$REMOTE_HOME_CACHE"
+        return
+    fi
+    local resolved
+    resolved=$(ssh "$SSH_HOST" 'readlink -f $HOME') || die "cannot resolve remote HOME"
+    mkdir -p "$(dirname "$REMOTE_HOME_CACHE")"
+    echo "$resolved" > "$REMOTE_HOME_CACHE"
+    echo "$resolved"
+}
+
+# Translate a local path to its remote equivalent.
+# ~/go/src/foo → /local/home/etarn/go/src/foo
+to_remote() {
+    local p="$1" remote_home="$2"
+    # Expand ~ explicitly in case the shell didn't (e.g. quoted arg)
+    p="${p/#\~/$HOME}"
+    [[ "$p" == "$HOME"* ]] || die "path must start with \$HOME: $p"
+    echo "${p/$HOME/$remote_home}"
+}
+
+# ── Pick mode: no args → list existing worktrees and attach ──────────────
+if [[ $# -eq 0 ]]; then
+    # Single SSH call: resolve home + discover all worktrees.
+    # First line of output is the resolved HOME, rest are worktree entries.
+    lines=()
+    while IFS= read -r line; do
+        [[ -n "$line" ]] && lines+=("$line")
+    done < <(
+        ssh "$SSH_HOST" bash <<'PICK'
+            set -eu
+            home=$(readlink -f "$HOME")
+            echo "HOME:$home"
+            shopt -s nullglob
+            for wt_dir in "$home"/*/.worktrees "$home"/*/*/.worktrees "$home"/*/*/*/.worktrees "$home"/*/*/*/*/.worktrees "$home"/*/*/*/*/*/.worktrees; do
+                repo="${wt_dir%/.worktrees}"
+                if [ -d "$repo/.git" ] || [ -f "$repo/.git" ]; then
+                    git -C "$repo" worktree list --porcelain 2>/dev/null \
+                    | awk '/^worktree / { wt=$2 } /^branch / { br=$2; sub(/^refs\/heads\//, "", br); if (wt ~ /\/.worktrees\//) print wt "\t" br }'
+                fi
+            done
+PICK
+    )
+
+    if [[ ${#lines[@]} -eq 0 ]]; then
+        die "no worktrees found on remote"
+    fi
+
+    # First line is the resolved home
+    remote_home="${lines[0]#HOME:}"
+    lines=("${lines[@]:1}")
+
+    if [[ ${#lines[@]} -eq 0 ]]; then
+        die "no worktrees found on remote"
+    fi
+
+    # Cache it for future create/reattach calls
+    mkdir -p "$(dirname "$REMOTE_HOME_CACHE")"
+    echo "$remote_home" > "$REMOTE_HOME_CACHE"
+
+    # Fetch session titles from the opencode server (best-effort, fast).
+    # Sessions may be rooted at the worktree dir or the parent repo dir,
+    # so we match both. Python emits one "wt_path\ttitle" line per worktree.
+    session_data=""
+    if session_json=$(curl -sf --max-time 3 "$OPENCODE_URL/experimental/session" 2>/dev/null); then
+        wt_paths=""
+        for i in "${!lines[@]}"; do
+            wt_paths="${wt_paths}${lines[$i]%%$'\t'*}"$'\n'
+        done
+        session_data=$(echo "$session_json" | python3 -c "
+import json, sys
+
+sessions = json.load(sys.stdin)
+wt_paths = [l for l in sys.argv[1].strip().splitlines() if l]
+
+for wt in wt_paths:
+    repo = wt.rsplit('/.worktrees/', 1)[0] if '/.worktrees/' in wt else ''
+    best = ''
+    for s in sessions:
+        d, t = s.get('directory', ''), s.get('title', '')
+        if not t:
+            continue
+        if d == wt:
+            best = t
+            break
+        if repo and d == repo and not best:
+            best = t
+    print(wt + '\t' + best)
+" "$wt_paths" 2>/dev/null)
+    fi
+
+    for i in "${!lines[@]}"; do
+        wt_path="${lines[$i]%%$'\t'*}"
+        branch="${lines[$i]##*$'\t'}"
+        repo_path="${wt_path%/.worktrees/*}"
+        local_repo="~/${repo_path#"$remote_home"/}"
+        title=""
+        if [[ -n "$session_data" ]]; then
+            title=$(echo "$session_data" | while IFS=$'\t' read -r dir t; do
+                [[ "$dir" == "$wt_path" ]] && echo "$t" && break
+            done)
+        fi
+        printf "  %s\n" "${title:-$branch}"
+        printf "    worktree %s %s\n\n" "$local_repo" "$branch"
+    done
+    exit 0
+fi
+
+# ── Create-or-attach mode ────────────────────────────────────────────────
+remote_home=$(resolve_remote_home)
+remote_path=$(to_remote "$1" "$remote_home")
+name=${2:-$(date +%m%dT%H%M)-$RANDOM}
+
+# Single SSH call: validate repo, create or verify worktree exists.
+worktree_path=$(ssh "$SSH_HOST" bash <<EOF
+    set -eu
+    repo=\$(git -C "$remote_path" rev-parse --show-toplevel 2>/dev/null) || {
+        echo "ERR:not a git repo: $remote_path" >&2; exit 1
+    }
+    wt="\$repo/.worktrees/$name"
+
+    if [ -d "\$wt" ]; then
+        echo "existing:\$wt"
+        exit 0
+    fi
+
+    # Only create if no second arg was given (create mode)
+    if [ "$#" -lt 2 ]; then
+        cd "\$repo"
+        if git show-ref --verify --quiet "refs/heads/$name"; then
+            git worktree add ".worktrees/$name" "$name" >&2
+        else
+            git worktree add ".worktrees/$name" -b "$name" >&2
+        fi
+        echo "created:\$wt"
+    else
+        echo "ERR:worktree not found: \$wt" >&2
+        exit 1
+    fi
+EOF
+) || die "remote command failed for: $remote_path"
+
+# Parse result — "existing:/path" or "created:/path"
+is_new=true
+if [[ "$worktree_path" == existing:* ]]; then
+    is_new=false
+fi
+worktree_path="${worktree_path#*:}"
+
+if [[ "$is_new" == true ]]; then
+    echo "Created worktree: $name"
+    echo "  reattach: worktree $1 $name"
+fi
+
+curl -sf --max-time 2 "$OPENCODE_URL/global/health" >/dev/null 2>&1 \
+    || die "opencode server unreachable at $OPENCODE_URL"
+
+exec opencode attach "$OPENCODE_URL" --dir "$worktree_path"
