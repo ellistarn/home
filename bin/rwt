@@ -138,7 +138,7 @@ fi
 
 # Open SSH workspace and cd into the worktree.
 # send buffers input until the remote shell is ready — no sleep needed.
-ws_line=$(cmux ssh "$SSH_HOST" --name "$name") \
+ws_line=$(cmux ssh "$SSH_HOST") \
     || die "failed to create cmux ssh workspace"
 ws_id=$(echo "$ws_line" | grep -o 'workspace:[0-9]*') \
     || die "could not parse workspace id from: $ws_line"
