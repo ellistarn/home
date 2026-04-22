@@ -144,3 +144,6 @@ ws_id=$(echo "$ws_line" | grep -o 'workspace:[0-9]*') \
     || die "could not parse workspace id from: $ws_line"
 cmux send --workspace "$ws_id" "cd $worktree_path && opencode" >/dev/null
 cmux send-key --workspace "$ws_id" Enter >/dev/null
+
+# Close the surface that invoked rwt — if it's the last one, the workspace closes too.
+[[ -n "${CMUX_SURFACE_ID:-}" ]] && cmux close-surface --surface "$CMUX_SURFACE_ID" >/dev/null 2>&1 || true

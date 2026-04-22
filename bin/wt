@@ -24,4 +24,5 @@ else
     [[ -d "$wt" ]] || die "worktree not found: $wt"
 fi
 
-exec cmux new-workspace --name "$name" --cwd "$wt" --command "opencode"
+cd "$wt" || die "cannot cd to $wt"
+exec opencode
