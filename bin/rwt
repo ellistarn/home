@@ -1,5 +1,5 @@
 #!/bin/bash
-# rwt — create or resume a remote git worktree and attach via opencode.
+# rwt — create or resume a remote git worktree in a cmux ssh workspace.
 #
 #   rwt                             # pick from existing worktrees
 #   rwt <path>                      # new worktree, auto-named
@@ -11,7 +11,6 @@
 # Cleanup is handled by git-gone when the branch lands.
 set -euo pipefail
 
-OPENCODE_URL="http://opencode.etarn"
 SSH_HOST="${DEV_DESKTOP_HOST:?DEV_DESKTOP_HOST is not set}"
 REMOTE_HOME_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rwt-remote-home"
 
@@ -45,10 +44,8 @@ to_remote() {
     echo "${p/$HOME/$remote_home}"
 }
 
-# ── Pick mode: no args → list existing worktrees and attach ──────────────
+# ── Pick mode: no args → list existing worktrees ────────────────────────
 if [[ $# -eq 0 ]]; then
-    # Single SSH call: resolve home + discover all worktrees.
-    # First line of output is the resolved HOME, rest are worktree entries.
     lines=()
     while IFS= read -r line; do
         [[ -n "$line" ]] && lines+=("$line")
@@ -72,7 +69,6 @@ PICK
         die "no worktrees found on remote"
     fi
 
-    # First line is the resolved home
     remote_home="${lines[0]#HOME:}"
     lines=("${lines[@]:1}")
 
@@ -80,53 +76,15 @@ PICK
         die "no worktrees found on remote"
     fi
 
-    # Cache it for future create/reattach calls
     mkdir -p "$(dirname "$REMOTE_HOME_CACHE")"
     echo "$remote_home" > "$REMOTE_HOME_CACHE"
-
-    # Fetch session titles from the opencode server (best-effort, fast).
-    # Sessions may be rooted at the worktree dir or the parent repo dir,
-    # so we match both. Python emits one "wt_path\ttitle" line per worktree.
-    session_data=""
-    if session_json=$(curl -sf --max-time 3 "$OPENCODE_URL/experimental/session" 2>/dev/null); then
-        wt_paths=""
-        for i in "${!lines[@]}"; do
-            wt_paths="${wt_paths}${lines[$i]%%$'\t'*}"$'\n'
-        done
-        session_data=$(echo "$session_json" | python3 -c "
-import json, sys
-
-sessions = json.load(sys.stdin)
-wt_paths = [l for l in sys.argv[1].strip().splitlines() if l]
-
-for wt in wt_paths:
-    repo = wt.rsplit('/.worktrees/', 1)[0] if '/.worktrees/' in wt else ''
-    best = ''
-    for s in sessions:
-        d, t = s.get('directory', ''), s.get('title', '')
-        if not t:
-            continue
-        if d == wt:
-            best = t
-            break
-        if repo and d == repo and not best:
-            best = t
-    print(wt + '\t' + best)
-" "$wt_paths" 2>/dev/null)
-    fi
 
     for i in "${!lines[@]}"; do
         wt_path="${lines[$i]%%$'\t'*}"
         branch="${lines[$i]##*$'\t'}"
         repo_path="${wt_path%/.worktrees/*}"
         local_repo="~/${repo_path#"$remote_home"/}"
-        title=""
-        if [[ -n "$session_data" ]]; then
-            title=$(echo "$session_data" | while IFS=$'\t' read -r dir t; do
-                [[ "$dir" == "$wt_path" ]] && echo "$t" && break
-            done)
-        fi
-        printf "  %s\n" "${title:-$branch}"
+        printf "  %s\n" "$branch"
         printf "    rwt %s %s\n\n" "$local_repo" "$branch"
     done
     exit 0
@@ -166,7 +124,6 @@ worktree_path=$(ssh "$SSH_HOST" bash <<EOF
 EOF
 ) || die "remote command failed for: $remote_path"
 
-# Parse result — "existing:/path" or "created:/path"
 is_new=true
 if [[ "$worktree_path" == existing:* ]]; then
     is_new=false
@@ -174,11 +131,16 @@ fi
 worktree_path="${worktree_path#*:}"
 
 if [[ "$is_new" == true ]]; then
+    display_path="${1/#$HOME/~}"
     echo "Created worktree: $name"
-    echo "  reattach: rwt $1 $name"
+    echo "  reattach: rwt $display_path $name"
 fi
 
-curl -sf --max-time 2 "$OPENCODE_URL/global/health" >/dev/null 2>&1 \
-    || die "opencode server unreachable at $OPENCODE_URL"
-
-exec opencode attach "$OPENCODE_URL" --dir "$worktree_path"
+# Open SSH workspace and cd into the worktree.
+# send buffers input until the remote shell is ready — no sleep needed.
+ws_line=$(cmux ssh "$SSH_HOST" --name "$name") \
+    || die "failed to create cmux ssh workspace"
+ws_id=$(echo "$ws_line" | grep -o 'workspace:[0-9]*') \
+    || die "could not parse workspace id from: $ws_line"
+cmux send --workspace "$ws_id" "cd $worktree_path && opencode" >/dev/null
+cmux send-key --workspace "$ws_id" Enter >/dev/null
