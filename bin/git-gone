@@ -35,7 +35,7 @@ set -euo pipefail
 
 dry_run=false
 stale_mode=false
-stale_hours=24
+stale_hours=12
 
 while [ $# -gt 0 ]; do
     case "$1" in
