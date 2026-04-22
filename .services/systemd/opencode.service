@@ -9,7 +9,7 @@ WorkingDirectory=/home/etarn
 Environment=OPENCODE_CONFIG=/home/etarn/.config/opencode/opencode.json
 Environment=OPENCODE_CONFIG_DIR=/home/etarn/.config/opencode
 ExecStart=/home/etarn/.opencode/bin/opencode serve --port 9000
-Restart=on-failure
+Restart=always
 RestartSec=5
 
 [Install]

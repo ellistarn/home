@@ -7,7 +7,7 @@ Type=simple
 User=etarn
 WorkingDirectory=/home/etarn
 ExecStart=/home/etarn/services/code-server-4.9.1-linux-amd64/bin/code-server --bind-addr 127.0.0.1:9001
-Restart=on-failure
+Restart=always
 RestartSec=5
 
 [Install]
