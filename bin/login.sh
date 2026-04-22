@@ -1,34 +1,53 @@
 #!/bin/bash
 
-# Refreshes midway cookie via mwinit -f.
-# --check: only refresh if cookie is missing or stale (used by .zshrc)
-# No args: always refresh (manual use)
+# Idempotent gate for Midway auth and dev desktop tunnel.
+#
+# --check  (from .zshrc): read-only validation. Warns on problems, never prompts.
+# No args  (manual use): force-refresh cookie, restart tunnel.
 
 COOKIE_FILE="$HOME/.midway/cookie"
-MAX_AGE="8h"
+MIDWAY_URL="https://midway-auth.amazon.com/"
+HOST="${DEV_DESKTOP_HOST:-}"
+PORT="${DEV_DESKTOP_TUNNEL_PORT:-}"
 
-needs_refresh() {
-    [[ ! -f "$COOKIE_FILE" ]] || [[ $(find "$COOKIE_FILE" -mtime +$MAX_AGE 2>/dev/null) ]]
+cookie_valid() {
+    [[ -f "$COOKIE_FILE" ]] || return 1
+    local code
+    code=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 2 --max-time 5 \
+        --cookie "$COOKIE_FILE" "$MIDWAY_URL" 2>/dev/null)
+    case "$code" in
+        200) return 0 ;;
+        000) echo "Cannot reach midway-auth (network issue?)" >&2; return 1 ;;
+        *)   return 1 ;;
+    esac
 }
 
-refresh() {
+tunnel_running() {
+    [[ -n "$HOST" ]] && [[ -n "$PORT" ]] && lsof -i :"$PORT" -sTCP:LISTEN &>/dev/null
+}
+
+kill_tunnel() {
+    [[ -n "$PORT" ]] && lsof -ti :"$PORT" -sTCP:LISTEN 2>/dev/null | xargs kill 2>/dev/null
+}
+
+start_tunnel() {
+    [[ -n "$HOST" ]] && [[ -n "$PORT" ]] || return 0
+    ssh -f -N -o ConnectTimeout=5 -L "$PORT":localhost:"$PORT" "$HOST" 2>/dev/null
+}
+
+if [[ "$1" == "--check" ]]; then
+    tunnel_running && exit 0
+    cookie_valid || { echo "Midway cookie is invalid or missing. Run login.sh to refresh."; exit 0; }
+    start_tunnel
+else
     echo "Refreshing mwinit..."
     if ! mwinit -f; then
         echo "mwinit failed — removing cookie so next attempt starts clean."
         rm -f "$COOKIE_FILE"
-        return 1
+        exit 1
     fi
-}
-
-if [[ "$1" == "--check" ]]; then
-    needs_refresh && refresh
-else
-    refresh
-fi
-
-# Start dev tunnel if not already running
-PORT="${DEV_DESKTOP_TUNNEL_PORT:-}"
-if [[ -n "${DEV_DESKTOP_HOST:-}" ]] && [[ -n "$PORT" ]] && ! lsof -i :"$PORT" -sTCP:LISTEN &>/dev/null; then
-    echo "Starting dev tunnel to ${DEV_DESKTOP_HOST}..."
-    ssh -f -N -o ConnectTimeout=5 -L "$PORT":localhost:"$PORT" "$DEV_DESKTOP_HOST" 2>/dev/null
+    kill_tunnel
+    start_tunnel
+    sleep 1
+    tunnel_running || { echo "Tunnel failed to start to $HOST:$PORT" >&2; exit 1; }
 fi
