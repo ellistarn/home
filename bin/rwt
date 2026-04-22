@@ -1,9 +1,9 @@
 #!/bin/bash
-# worktree — create or resume a remote git worktree and attach via opencode.
+# rwt — create or resume a remote git worktree and attach via opencode.
 #
-#   worktree                        # pick from existing worktrees
-#   worktree <path>                 # new worktree, auto-named
-#   worktree <path> <name>          # reattach to existing worktree
+#   rwt                             # pick from existing worktrees
+#   rwt <path>                      # new worktree, auto-named
+#   rwt <path> <name>               # reattach to existing worktree
 #
 # Accepts full local paths (~/go/src/...) which are translated to remote
 # paths by replacing $HOME with $REMOTE_HOME. Worktrees live at
@@ -13,9 +13,9 @@ set -euo pipefail
 
 OPENCODE_URL="http://opencode.etarn"
 SSH_HOST="${DEV_DESKTOP_HOST:?DEV_DESKTOP_HOST is not set}"
-REMOTE_HOME_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/worktree-remote-home"
+REMOTE_HOME_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rwt-remote-home"
 
-die() { echo "worktree: $*" >&2; exit 1; }
+die() { echo "rwt: $*" >&2; exit 1; }
 
 # Resolve and cache the remote physical home directory.
 # git outputs symlink-resolved paths, so we need the physical path.
@@ -127,7 +127,7 @@ for wt in wt_paths:
             done)
         fi
         printf "  %s\n" "${title:-$branch}"
-        printf "    worktree %s %s\n\n" "$local_repo" "$branch"
+        printf "    rwt %s %s\n\n" "$local_repo" "$branch"
     done
     exit 0
 fi
@@ -175,7 +175,7 @@ worktree_path="${worktree_path#*:}"
 
 if [[ "$is_new" == true ]]; then
     echo "Created worktree: $name"
-    echo "  reattach: worktree $1 $name"
+    echo "  reattach: rwt $1 $name"
 fi
 
 curl -sf --max-time 2 "$OPENCODE_URL/global/health" >/dev/null 2>&1 \
