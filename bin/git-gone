@@ -5,10 +5,10 @@
 #
 #   is_dirty(worktree)   — tracked modifications (staged or unstaged).
 #                          Untracked files are not evidence of active work.
-#   work_landed(branch)  — all commits reachable by ancestry, patch-
-#                          equivalent (git cherry), tree-equivalent
-#                          (merge-tree simulation), or subject-matched
-#                          (commit message modulo GitHub's PR suffix).
+#   work_landed(branch)  — all commits reachable by ancestry or tree-
+#                          equivalent (merge-tree simulation, which
+#                          compares actual diff content — handles squash
+#                          merges regardless of commit message changes).
 #   is_stale(branch, wt) — max(worktree mtime, branch tip committer date)
 #                          is older than $stale_hours.  Only consulted in
 #                          --stale mode.
@@ -16,10 +16,9 @@
 #   Decision table:
 #     dirty                           → keep  (hint: force-delete command)
 #     clean + landed                  → delete {branch, worktree, remote}
-#     clean + stale (--stale only)    → delete {branch, worktree};
-#                                       pushed remote surfaced for manual
-#                                       cleanup (no landed-verification
-#                                       safety net to auto-delete it)
+#     clean + no remote + stale       → delete {branch, worktree}
+#       (--stale only)                  (a remote means it was pushed,
+#                                       likely a PR — leave it alone)
 #     clean + not landed + not stale  → keep  (hint: delete command)
 #
 #   Branches not in the table were auto-deleted (work confirmed landed or
@@ -27,10 +26,9 @@
 #
 # Flags:
 #   -n, --dry-run        show what would happen, change nothing
-#   --stale [HOURS]      also delete branches idle > HOURS (default 24);
-#                        local branch + worktree only, pushed remote
-#                        listed under "Orphaned remotes" for you to
-#                        delete manually if desired
+#   --stale [HOURS]      also delete branches idle > HOURS (default 12);
+#                        local-only branches (no remote) only — branches
+#                        with a pushed remote are never stale-deleted
 set -euo pipefail
 
 dry_run=false
@@ -141,9 +139,10 @@ is_stale() {
 }
 
 # unlanded_commits REF [EXCLUDE_REF] — print commits from REF not yet
-# landed on any remote branch across all remotes (empty = all landed).
-# Uses ancestry first, then patch equivalence (git cherry) for squash merges,
-# then merge-tree simulation and commit message matching as fallbacks.
+# landed on any remote branch (empty = all landed).
+# Uses ancestry first (fast path for regular merges), then merge-tree
+# simulation (covers squash merges — compares actual tree content rather
+# than commit identity or messages).
 # EXCLUDE_REF prevents a branch's own remote from self-satisfying the check.
 unlanded_commits() {
     local ref=$1 exclude_ref=${2:-}
@@ -161,54 +160,19 @@ unlanded_commits() {
     fi
     [ -z "$by_ancestry" ] && return 0
 
-    # Slow path: patch equivalence via git cherry — covers squash merges
-    # where a single commit was cherry-picked or squash-merged with the
-    # same diff context (branch base == squash commit parent).
-    local remote_ref cherry_out exclude_short="${exclude_ref#refs/remotes/}"
+    # Slow path: merge-tree — simulate merging branch into each remote ref.
+    # If the result tree equals the remote's tree, the branch adds nothing
+    # new (its diff is already present).  Covers squash merges regardless
+    # of commit message changes.  Requires git 2.38+.
+    # A merge conflict (nonzero exit) means the branch has changes not in
+    # the target — correctly treated as "not landed."
+    local remote_ref exclude_short="${exclude_ref#refs/remotes/}" result_tree target_tree
     while IFS= read -r remote_ref; do
         [ "$remote_ref" = "$exclude_short" ] && continue
-        cherry_out=$(git cherry "$remote_ref" "$ref" 2>/dev/null)
-        [ -z "$cherry_out" ] && continue
-        echo "$cherry_out" | grep -q '^+' && continue
-        return 0
-    done < <(git branch -r 2>/dev/null | tr -d ' ' | grep -Fv -- '->')
-
-    # Squash merge detection — git cherry compares per-commit patch-ids,
-    # which fails for multi-commit squash merges (combined diff != any
-    # individual commit) and single commits with shifted context (other
-    # work landed between branch fork and squash merge, changing the diff).
-    #
-    # Extract the first (chronological) branch commit subject for message
-    # matching.  GitHub squash merges use the PR title — typically the
-    # first commit's subject — with " (#N)" appended.  Using only one
-    # subject minimizes false positives from common messages like "fix lint".
-    # by_ancestry format: git log --oneline (newest first): "<hash> <subject>"
-    local squash_subject
-    squash_subject=$(echo "$by_ancestry" | tail -1)
-    squash_subject="${squash_subject#* }"
-
-    local result_tree target_tree merge_base target_msgs
-    while IFS= read -r remote_ref; do
-        [ "$remote_ref" = "$exclude_short" ] && continue
-
-        # merge-tree: simulate merging branch into target.  If the result
-        # tree equals the target's tree, the branch adds nothing new.
-        # Requires git 2.38+; degrades gracefully (falls through).
         if result_tree=$(git merge-tree --write-tree "$remote_ref" "$ref" 2>/dev/null); then
             target_tree=$(git rev-parse "${remote_ref}^{tree}" 2>/dev/null) || true
             [ "$result_tree" = "$target_tree" ] && return 0
         fi
-
-        # Commit message: GitHub squash merges use the PR title (typically
-        # a branch commit's subject) with " (#N)" appended.  Match the
-        # first branch commit subject against recent target commits modulo
-        # that suffix.  -200 caps the graph walk for large ranges.
-        [ -z "$squash_subject" ] && continue
-        merge_base=$(git merge-base "$remote_ref" "$ref" 2>/dev/null) || continue
-        target_msgs=$(git log -200 --format=%s "$merge_base".."$remote_ref" 2>/dev/null \
-            | sed 's/ (#[0-9]*)$//')
-        [ -z "$target_msgs" ] && continue
-        echo "$target_msgs" | grep -qFx "$squash_subject" && return 0
     done < <(git branch -r 2>/dev/null | tr -d ' ' | grep -Fv -- '->')
 
     echo "$by_ancestry"
@@ -304,16 +268,13 @@ while read -r branch _; do
             keep "$branch" "landed" \
                 "(remote delete failed) $(build_hint "$branch" "$wt" $remote)"
         fi
-    # Stale? → delete local branch + worktree; preserve the remote (if
-    # any) and surface it separately for manual cleanup.  Landed still
-    # takes priority, so a stale-AND-landed branch goes through landed's
-    # full triplet delete above.
-    elif $stale_mode && is_stale "$branch" "$wt" "$stale_hours"; then
-        if ! delete_all "$branch" "$wt" $remote false; then
+    # Stale? → delete local branch + worktree.  Only applies to branches
+    # with no remote — a remote means someone pushed (likely a PR), so
+    # leave it alone.  Landed still takes priority above.
+    elif $stale_mode && ! $remote && is_stale "$branch" "$wt" "$stale_hours"; then
+        if ! delete_all "$branch" "$wt" false; then
             keep "$branch" "stale" \
-                "(delete failed) $(build_hint "$branch" "$wt" $remote)"
-        elif $remote; then
-            orphaned_remotes+=("$branch")
+                "(delete failed) $(build_hint "$branch" "$wt" false)"
         fi
     else
         keep "$branch" "not landed" "$(build_hint "$branch" "$wt" $remote)"
@@ -333,10 +294,17 @@ if [ ${#deleted_remote[@]} -gt 0 ]; then
         "$rverb" "$(IFS=', '; echo "${deleted_remote[*]}")"
 fi
 if [ ${#orphaned_remotes[@]} -gt 0 ]; then
-    printf "  ${BOLD}Orphaned remotes (%d):${RST} ${DIM}local gone, remote survives${RST}\n" \
-        "${#orphaned_remotes[@]}"
-    printf "  ${YELLOW}git push origin --delete %s${RST}\n" \
-        "$(IFS=' '; echo "${orphaned_remotes[*]}")"
+    if $dry_run; then
+        printf "  ${BOLD}Would orphan remotes (%d):${RST} ${DIM}local would be deleted, remote survives${RST}\n" \
+            "${#orphaned_remotes[@]}"
+        printf "  ${DIM}# would run: git push origin --delete %s${RST}\n" \
+            "$(IFS=' '; echo "${orphaned_remotes[*]}")"
+    else
+        printf "  ${BOLD}Orphaned remotes (%d):${RST} ${DIM}local gone, remote survives${RST}\n" \
+            "${#orphaned_remotes[@]}"
+        printf "  ${YELLOW}git push origin --delete %s${RST}\n" \
+            "$(IFS=' '; echo "${orphaned_remotes[*]}")"
+    fi
 fi
 [ ${#deleted[@]} -gt 0 ] || [ ${#deleted_remote[@]} -gt 0 ] || [ ${#orphaned_remotes[@]} -gt 0 ] && printf "\n"
 
