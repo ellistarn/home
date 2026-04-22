@@ -30,5 +30,5 @@ fi
 PORT="${DEV_DESKTOP_TUNNEL_PORT:-}"
 if [[ -n "${DEV_DESKTOP_HOST:-}" ]] && [[ -n "$PORT" ]] && ! lsof -i :"$PORT" -sTCP:LISTEN &>/dev/null; then
     echo "Starting dev tunnel to ${DEV_DESKTOP_HOST}..."
-    ssh -f -N -L "$PORT":localhost:"$PORT" "$DEV_DESKTOP_HOST" 2>/dev/null
+    ssh -f -N -o ConnectTimeout=5 -L "$PORT":localhost:"$PORT" "$DEV_DESKTOP_HOST" 2>/dev/null
 fi
