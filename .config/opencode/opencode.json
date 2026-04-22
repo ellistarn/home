@@ -12,7 +12,7 @@
     "builder-mcp": {
       "type": "local",
       "command": [
-        "/Users/etarn/.toolbox/bin/builder-mcp",
+        "{env:HOME}/.toolbox/bin/builder-mcp",
         "--include-tools",
         "InternalCodeSearch,InternalSearch,ReadInternalWebsites,WorkspaceSearch,WorkspaceGitDetails,BrazilBuildAnalyzerTool"
       ],
