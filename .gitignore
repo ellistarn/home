@@ -45,9 +45,10 @@ bin/.*
 !.claude/agents/*.md
 !.claude/.mcp.json
 
-# Skills
-!.skills
-!.skills/**
+# Agents
+!.agents
+!.agents/skills
+!.agents/skills/**
 
 # code-server
 !.config/code-server
