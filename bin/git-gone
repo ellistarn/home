@@ -26,13 +26,12 @@
 #
 # Flags:
 #   -n, --dry-run        show what would happen, change nothing
-#   --stale [HOURS]      also delete branches idle > HOURS (default 12);
-#                        local-only branches (no remote) only — branches
-#                        with a pushed remote are never stale-deleted
+#   --stale [HOURS]      override stale threshold (default 12h);
+#                        stale-deletes local-only branches (no remote) —
+#                        branches with a pushed remote are never stale-deleted
 set -euo pipefail
 
 dry_run=false
-stale_mode=false
 stale_hours=12
 
 while [ $# -gt 0 ]; do
@@ -42,7 +41,6 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         --stale)
-            stale_mode=true
             shift
             # Optional numeric arg for hours.  Consume if next token is not
             # another flag; error if present but non-numeric.
@@ -271,7 +269,7 @@ while read -r branch _; do
     # Stale? → delete local branch + worktree.  Only applies to branches
     # with no remote — a remote means someone pushed (likely a PR), so
     # leave it alone.  Landed still takes priority above.
-    elif $stale_mode && ! $remote && is_stale "$branch" "$wt" "$stale_hours"; then
+    elif ! $remote && is_stale "$branch" "$wt" "$stale_hours"; then
         if ! delete_all "$branch" "$wt" false; then
             keep "$branch" "stale" \
                 "(delete failed) $(build_hint "$branch" "$wt" false)"
