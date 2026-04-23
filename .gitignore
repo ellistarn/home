@@ -1,9 +1,8 @@
 # Ignore everything
 *
 
-# Include README and AGENTS.md
+# Include README
 !README.md
-!AGENTS.md
 
 # Include git
 !.gitignore
@@ -56,6 +55,9 @@ bin/.*
 !.config/code-server/config.yaml
 
 # OpenCode
+!.opencode
+!.opencode/opencode.json
+!.opencode/AGENTS.md
 !.config
 !.config/opencode
 !.config/opencode/opencode.json

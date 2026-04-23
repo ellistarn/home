@@ -6,15 +6,15 @@ This file is machine-maintained. Agents must never patch it incrementally — al
 
 ## When to regenerate
 
-Regenerate AGENTS.md as part of any PR that adds, removes, or changes tracked files in this repo. The regeneration should be a commit in the PR branch, not a separate PR.
+Regenerate `.opencode/AGENTS.md` as part of any PR that adds, removes, or changes tracked files in this repo. The regeneration should be a commit in the PR branch, not a separate PR.
 
 ## How to regenerate
 
 1. Run `git ls-files` to get the authoritative list of tracked files.
 2. Read every tracked file. For each file, extract its purpose and key details.
-3. Rewrite this file in its entirety. Preserve the two-section structure: this Maintenance header, then the Home Directory reference below.
+3. Rewrite `.opencode/AGENTS.md` in its entirety. Preserve the two-section structure: this Maintenance header, then the Home Directory reference below.
 4. Verify every claim against the actual file contents — do not carry forward stale descriptions.
-5. Commit the updated AGENTS.md alongside the other changes in the PR.
+5. Commit the updated `.opencode/AGENTS.md` alongside the other changes in the PR.
 
 ---
 
