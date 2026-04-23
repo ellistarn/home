@@ -3,6 +3,14 @@
   "plugin": ["opencode-wakelock"],
   "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
   "default_agent": "plan",
+  "provider": {
+    "amazon-bedrock": {
+      "options": {
+        "region": "us-west-2",
+        "profile": "default"
+      }
+    }
+  },
   "permission": {
     "external_directory": {
       "~/go/src/github.com/ellistarn/**": "allow"
