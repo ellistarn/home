@@ -4,3 +4,8 @@ alias brp="brazil ws remove --package"
 alias bws="brazil ws --sync --md"
 
 alias journal='/apollo/env/JournalClientCLI/bin/journal'
+
+# git worktrees break cr's workspace detection because the worktree
+# path doesn't match packageInfo. Extract the version set from JSON
+# and pass it through.
+alias cr='command cr --vs "$(brazil ws show -f json | jq -r .version_set.name)"'

@@ -21,7 +21,7 @@
     "ellis": {
       "type": "local",
       "command": ["{env:HOME}/go/bin/muse", "listen"],
-      "enabled": true,
+      "enabled": false,
       "timeout": 120000,
       "environment": {
         "MUSE_MODEL": "us.anthropic.claude-opus-4-6-v1"
