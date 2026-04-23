@@ -8,6 +8,7 @@ User=etarn
 WorkingDirectory=/home/etarn
 Environment=OPENCODE_CONFIG=/home/etarn/.config/opencode/opencode.json
 Environment=OPENCODE_CONFIG_DIR=/home/etarn/.config/opencode
+Environment=OPENCODE_MODEL=amazon-bedrock/us.anthropic.claude-opus-4-6-v1
 ExecStart=/home/etarn/.opencode/bin/opencode serve --port 9000
 Restart=always
 RestartSec=5
