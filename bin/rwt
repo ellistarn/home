@@ -114,7 +114,7 @@ worktree_path=$(ssh "$SSH_HOST" bash <<EOF
         if git show-ref --verify --quiet "refs/heads/$name"; then
             git worktree add ".worktrees/$name" "$name" >&2
         else
-            git worktree add ".worktrees/$name" -b "$name" @{upstream} >&2
+            git worktree add ".worktrees/$name" -b "$name" >&2
         fi
         echo "created:\$wt"
     else
