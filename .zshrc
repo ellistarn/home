@@ -1,3 +1,7 @@
+# Resolve symlinks in HOME so tools that compare real paths (e.g. OpenCode
+# permissions) don't see /home/etarn and /local/home/etarn as different trees.
+export HOME=$(readlink -f "$HOME")
+
 # Awesome Zsh Plugins: https://github.com/unixorn/awesome-zsh-plugins
 # Antigen: https://github.com/zsh-users/antigen
 # Oh My Zsh: https://github.com/ohmyzsh/ohmyzsh
