@@ -13,8 +13,7 @@ Environment=OPENCODE_MODEL=amazon-bedrock/us.anthropic.claude-opus-4-6-v1
 Environment=CLAUDE_CODE_USE_BEDROCK=1
 Environment=OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true
 Environment=AWS_EC2_METADATA_DISABLED=true
-Environment=AWS_ACCOUNT_ID=767520670908
-ExecStart=/home/etarn/bin/opencode-serve --port 9000
+ExecStart=/bin/bash -c 'eval "$(ada credentials print --account 767520670908 --role Admin --format env)" && exec $HOME/.opencode/bin/opencode serve --port 9000'
 RuntimeMaxSec=3600
 Restart=always
 RestartSec=1
