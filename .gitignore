@@ -1,8 +1,9 @@
 # Ignore everything
 *
 
-# Include README
+# Include README and AGENTS.md
 !README.md
+!AGENTS.md
 
 # Include git
 !.gitignore
