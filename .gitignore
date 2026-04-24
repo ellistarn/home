@@ -55,9 +55,8 @@ bin/.*
 !.config/code-server/config.yaml
 
 # OpenCode
-!.opencode
-!.opencode/opencode.json
-!.opencode/AGENTS.md
+!opencode.json
+!MAINTENANCE.md
 !.config
 !.config/opencode
 !.config/opencode/opencode.json
