@@ -27,6 +27,10 @@
         <string>1</string>
         <key>OPENCODE_DISABLE_CLAUDE_CODE_PROMPT</key>
         <string>true</string>
+        <key>AWS_ACCOUNT_ID</key>
+        <string>767520670908</string>
+        <key>AWS_EC2_METADATA_DISABLED</key>
+        <string>true</string>
     </dict>
     <key>KeepAlive</key>
     <true/>
