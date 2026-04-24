@@ -11,10 +11,12 @@
         <string>--port</string>
         <string>9000</string>
     </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/etarn</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/Users/etarn/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <string>/Users/etarn/bin:/Users/etarn/.toolbox/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/sbin:/bin</string>
         <key>HOME</key>
         <string>/Users/etarn</string>
         <key>OPENCODE_CONFIG</key>
