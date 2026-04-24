@@ -157,9 +157,13 @@ func cmdLs(remoteOnly bool) {
 	local := (<-localCh).entries
 	remote := (<-remoteCh).entries
 
-	enrichLocalWithSessions(local)
+	if err := enrichWithSessions(localServerURL(), local); err != nil {
+		fmt.Fprintf(os.Stderr, "wt: warning: could not fetch local sessions: %v\n", err)
+	}
 	if host != "" {
-		enrichRemoteWithSessions(host, remote)
+		if err := enrichWithSessions(opencodeServerURL(), remote); err != nil {
+			fmt.Fprintf(os.Stderr, "wt: warning: could not fetch remote sessions: %v\n", err)
+		}
 	}
 
 	all := append(local, remote...)
