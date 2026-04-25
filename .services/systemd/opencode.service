@@ -14,7 +14,7 @@ Environment=CLAUDE_CODE_USE_BEDROCK=1
 Environment=OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true
 Environment=AWS_ACCOUNT_ID=767520670908
 Environment=AWS_EC2_METADATA_DISABLED=true
-ExecStart=/home/etarn/.opencode/bin/opencode serve --port 9000
+ExecStart=/home/etarn/.opencode/bin/opencode serve
 Restart=always
 RestartSec=1
 

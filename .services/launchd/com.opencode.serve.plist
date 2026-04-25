@@ -8,8 +8,6 @@
     <array>
         <string>/opt/homebrew/bin/opencode</string>
         <string>serve</string>
-        <string>--port</string>
-        <string>9000</string>
     </array>
     <key>WorkingDirectory</key>
     <string>/Users/etarn</string>

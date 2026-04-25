@@ -75,6 +75,7 @@ export AWS_REGION=us-west-2  # or your preferred region
 
 # OpenCode
 export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true
+export WT_REMOTE_HOST=$DEV_DESKTOP_HOST
 
 ##### Github #####
 export GITHUB_USER=ellistarn
