@@ -81,7 +81,7 @@ Six skills available to all agent tools (OpenCode, Claude Code, etc.):
 
 ### OpenCode Config (`.config/opencode/`)
 
-- `opencode.json` — Global config: Bedrock Opus model, plan as default agent, MCP servers (builder-mcp, ellis/muse — both disabled), external directory permissions for `~/go/src/github.com/ellistarn/**`
+- `opencode.json` — Global config: Bedrock Opus model, plan as default agent, MCP servers (builder-mcp, ellis/muse — both disabled). Build agent configured with `doom_loop`/`external_directory`/`question` denied (no approval prompts). Explore subagent overridden to Bedrock Sonnet 4.6.
 - `agents/author.md` — Subagent for writing design documents. Read-only (no bash). Gathers context, models the story, writes the complete next version, then self-reviews against declaring-designs checklist.
 - `commands/finish.md` — Slash command triggering the finish skill checklist.
 - `AGENTS.md` — Global personal preferences (communication style). Applied to every OpenCode session regardless of project.
@@ -141,7 +141,7 @@ macOS laptop                          Linux dev desktop
 - **PATH** includes: `~/bin`, `~/.local/bin`, `~/.opencode/bin`, `/opt/homebrew/bin`, Go, Cargo, Bun, Python 3.14, `.toolbox/bin`
 - **Identity:** GitHub user `ellistarn`, AWS account `767520670908`
 - **Kubernetes:** KO_DOCKER_REPO points to ECR, KUBECONFIG merges local `./.kube/config` with `~/.kube/config`
-- **Key aliases:** `c` = opencode, `q` = kiro-cli, `terraform` = tofu, `watch` = viddy
+- **Key aliases:** `q` = kiro-cli, `terraform` = tofu, `watch` = viddy
 - **Shell functions:** `instanceid` (EC2 from k8s node), `ssmnode` (SSM into k8s node), `ssmportforward`, `ecr_login`, `aws_login`
 
 ## Conventions
