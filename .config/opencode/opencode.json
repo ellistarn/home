@@ -11,11 +11,6 @@
       }
     }
   },
-  "permission": {
-    "external_directory": {
-      "~/go/src/github.com/ellistarn/**": "allow"
-    }
-  },
   "mcp": {
     "builder-mcp": {
       "type": "local",
@@ -41,5 +36,16 @@
     "builder-mcp_*": true,
     "ellis_*": true
   },
-  "agent": {}
+  "agent": {
+    "build": {
+      "permission": {
+        "doom_loop": "deny",
+        "external_directory": "deny",
+        "question": "deny"
+      }
+    },
+    "explore": {
+      "model": "amazon-bedrock/us.anthropic.claude-sonnet-4-6-v1"
+    }
+  }
 }
