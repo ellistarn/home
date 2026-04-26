@@ -56,7 +56,7 @@ bin/.*
 
 # OpenCode
 !opencode.json
-!MAINTENANCE.md
+!.AGENTS.md
 !.config
 !.config/opencode
 !.config/opencode/opencode.json
