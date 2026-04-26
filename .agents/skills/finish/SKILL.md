@@ -13,7 +13,7 @@ before checking the box. Do not check any box without evidence.
 ## Checklist
 
 - [ ] **Rebased** — PR branch is rebased to the latest commit on the target remote branch.
-- [ ] **Designs updated** — Design gaps and proposed updates have been reviewed by the human.
+- [ ] **Designs updated** — Design gaps have been surfaced to the human and design documents have been updated.
 - [ ] **Implementation Quality** — If implementing, load the reconcile-quality skill, execute the checklist, and show the results inline in this checklist.
 - [ ] **Design Quality** - If designing, load declaring-designs, execute the checklist, and show the results inline in this checklist.
 - [ ] **Validated** — Full presubmit has been run and passed.
