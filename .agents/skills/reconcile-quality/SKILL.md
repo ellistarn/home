@@ -1,5 +1,5 @@
 ---
-name: reconciling-implementations
+name: reconcile-quality
 description: Reconcile implementation quality against designs — correctness, performance, observability, testing, simplicity.
 ---
 

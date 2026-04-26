@@ -1,5 +1,5 @@
 ---
-name: reconciling-code-instrumentation
+name: reconcile-instrumentation
 description: >
   Reconcile code instrumentation against the system's decision points.
   Load when adding or reviewing diagnostic logging.
