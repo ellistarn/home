@@ -1,3 +1,0 @@
-#!/bin/bash
-# rwt — backward-compat wrapper for wt --remote
-exec wt --remote "$@"
