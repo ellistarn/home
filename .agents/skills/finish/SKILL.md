@@ -14,7 +14,7 @@ before checking the box. Do not check any box without evidence.
 
 - [ ] **Rebased** — PR branch is rebased to the latest commit on the target remote branch.
 - [ ] **Designs updated** — Design gaps and proposed updates have been reviewed by the human.
-- [ ] **Implementation Quality** — If implementing, load the reconciling-implementations skill, execute the checklist, and show the results inline in this checklist.
+- [ ] **Implementation Quality** — If implementing, load the reconcile-quality skill, execute the checklist, and show the results inline in this checklist.
 - [ ] **Design Quality** - If designing, load declaring-designs, execute the checklist, and show the results inline in this checklist.
 - [ ] **Validated** — Full presubmit has been run and passed.
 - [ ] **Committed** — Branch has a single commit. The message summarizes the change clearly — show not tell for perf improvements, logging changes, or anything measurable.

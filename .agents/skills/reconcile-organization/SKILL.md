@@ -1,5 +1,5 @@
 ---
-name: reconciling-code-organization
+name: reconcile-organization
 description: Reconcile code structure against its architecture by drawing boundaries at the right levels — packages, files, structs, functions.
 ---
 
