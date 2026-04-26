@@ -3,6 +3,12 @@
   "plugin": ["opencode-wakelock", "opencode-beads"],
   "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
   "default_agent": "plan",
+  // LSP disabled: full workspace diagnostics stored in context on every edit,
+  // consuming 40%+ of context on large Go projects (gopls). See anomalyco/opencode#6310.
+  "lsp": false,
+  "compaction": {
+    "prune": true
+  },
   "provider": {
     "amazon-bedrock": {
       "options": {
