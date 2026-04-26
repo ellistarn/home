@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-wakelock"],
+  "plugin": ["opencode-wakelock", "opencode-beads"],
   "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
   "default_agent": "plan",
   "provider": {
