@@ -1,2 +1,4 @@
-- Talk to me about algorithms not the code. I do not read the code
-- If you start speculating, stop, and find a way to cheaply validate your assumptions
+- Before starting work, understand the designs
+- Talk to me about algorithms, not code. I do not read the code
+- Parallelize wherever possible with subagents to work faster and save context.
+- Don't speculate: instrument, reproduce, analyze, root cause
