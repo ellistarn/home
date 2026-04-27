@@ -23,6 +23,18 @@ cookie_valid() {
     esac
 }
 
+ssh_cert_valid() {
+    [[ -f "$SSH_CERT" ]] || return 1
+    local end
+    end=$(ssh-keygen -L -f "$SSH_CERT" 2>/dev/null \
+        | sed -n 's/.*Valid:.*to \(.*\)/\1/p')
+    [[ -n "$end" ]] || return 1
+    local exp_epoch now_epoch
+    exp_epoch=$(date -d "$end" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%S" "$end" +%s 2>/dev/null)
+    now_epoch=$(date +%s)
+    [[ -n "$exp_epoch" ]] && (( now_epoch < exp_epoch ))
+}
+
 tunnel_running() {
     [[ -n "$HOST" ]] && [[ -n "$PORT" ]] && lsof -i :"$PORT" -sTCP:LISTEN &>/dev/null
 }
@@ -58,9 +70,9 @@ sync_credentials() {
 }
 
 if [[ "$1" == "--check" ]]; then
-    tunnel_running && exit 0
-    cookie_valid || { echo "Midway cookie is invalid or missing. Run login.sh to refresh."; exit 0; }
-    start_tunnel
+    cookie_valid || { echo "Midway cookie is invalid or missing. Run login.sh to refresh."; }
+    ssh_cert_valid || { echo "SSH certificate is expired or missing. Run login.sh to refresh."; }
+    tunnel_running || start_tunnel
 else
     echo "Refreshing mwinit..."
     if ! mwinit -f; then
