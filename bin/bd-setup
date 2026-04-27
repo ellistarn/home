@@ -15,7 +15,7 @@ while [ "$dir" != "/" ]; do
     echo "  rm -rf $dir/.beads"
     echo ""
     echo "Or initialize manually:"
-    echo "  bd init --stealth --prefix $(basename "$git_root") --non-interactive"
+    echo "  bd init --prefix $(basename "$git_root") --skip-agents --non-interactive"
     exit 1
   fi
   dir="$(dirname "$dir")"
@@ -35,7 +35,7 @@ fi
 # Check for config.yaml, not just .beads/ -- a partial init leaves .beads/ without it
 if [ ! -f ".beads/config.yaml" ]; then
   rm -rf .beads 2>/dev/null
-  bd init --stealth --prefix "$prefix" --non-interactive
+  bd init --prefix "$prefix" --skip-agents --non-interactive
 else
   echo "Beads already initialized (prefix=$prefix)"
 fi
