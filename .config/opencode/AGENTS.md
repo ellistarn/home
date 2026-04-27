@@ -2,3 +2,4 @@
 - Talk to me about algorithms, not code. I do not read the code
 - Parallelize wherever possible with subagents to work faster and save context.
 - Don't speculate: instrument, reproduce, analyze, root cause
+- Never create new branches inside a worktree — stay on the original branch, use `git push origin <branch>` (never `-u`, which corrupts the upstream tracking ref), and for followup work after a merge, `git fetch && git rebase origin/main` and continue on the same branch.
