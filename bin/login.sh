@@ -3,9 +3,10 @@
 # Idempotent gate for Midway auth and dev desktop tunnel.
 #
 # --check  (from .zshrc): read-only validation. Warns on problems, never prompts.
-# No args  (manual use): force-refresh cookie, restart tunnel.
+# No args  (manual use): force-refresh cookie, restart tunnel, sync credentials to dev desktop.
 
 COOKIE_FILE="$HOME/.midway/cookie"
+SSH_CERT="$HOME/.ssh/id_ecdsa-cert.pub"
 MIDWAY_URL="https://midway-auth.amazon.com/"
 HOST="${DEV_DESKTOP_HOST:-}"
 PORT="${DEV_DESKTOP_TUNNEL_PORT:-}"
@@ -35,6 +36,24 @@ start_tunnel() {
     ssh -f -N -o ConnectTimeout=5 -L "$PORT":localhost:"$PORT" "$HOST" 2>/dev/null
 }
 
+# Sync midway cookie and SSH certificate to the dev desktop so that
+# a single mwinit on the laptop covers both machines.  Requires the
+# same ~/.ssh/id_ecdsa key pair on both hosts.
+sync_credentials() {
+    [[ -n "$HOST" ]] || return 0
+    local ok=0
+    for f in "$COOKIE_FILE" "$SSH_CERT"; do
+        [[ -f "$f" ]] || continue
+        if scp -q -o ConnectTimeout=5 "$f" "$HOST:$f" 2>/dev/null; then
+            echo "Synced $(basename "$f") → $HOST"
+        else
+            echo "Failed to sync $(basename "$f") to $HOST" >&2
+            ok=1
+        fi
+    done
+    return $ok
+}
+
 if [[ "$1" == "--check" ]]; then
     tunnel_running && exit 0
     cookie_valid || { echo "Midway cookie is invalid or missing. Run login.sh to refresh."; exit 0; }
@@ -50,4 +69,5 @@ else
     start_tunnel
     sleep 1
     tunnel_running || { echo "Tunnel failed to start to $HOST:$PORT" >&2; exit 1; }
+    sync_credentials
 fi

@@ -1,7 +1,7 @@
 [user]
 	name = Ellis Tarn
 	email = ellistarn@gmail.com
-	signingkey = /Users/etarn/.ssh/id_ecdsa.pub
+	signingkey = ~/.ssh/id_ecdsa.pub
 
 [core]
 	pager = less -FMRiX
@@ -21,13 +21,16 @@
 	ui = auto
 
 [credential]
-	helper = osxkeychain
 	UseHttpPath = true
 
-[url "ssh://git@github.com/"]
-	insteadOf = https://github.com/
 [gpg]
 	format = ssh
 
 [includeIf "gitdir:~/workspaces/"]
 	path = ~/.gitconfig-amazon
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
