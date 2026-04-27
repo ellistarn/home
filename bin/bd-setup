@@ -1,0 +1,62 @@
+#!/bin/bash
+set -euo pipefail
+
+# Must be inside a git repo
+git_root="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "Not in a git repo"; exit 1; }
+
+# Detect parent .beads/ that would interfere with bd init's config walk-up
+dir="$(dirname "$git_root")"
+while [ "$dir" != "/" ]; do
+  if [ -d "$dir/.beads" ]; then
+    echo "Warning: found parent beads database at $dir/.beads/"
+    echo "bd init will try to bootstrap from that repo's git remote and fail."
+    echo ""
+    echo "Fix: remove the parent database (if unused):"
+    echo "  rm -rf $dir/.beads"
+    echo ""
+    echo "Or initialize manually:"
+    echo "  bd init --stealth --prefix $(basename "$git_root") --non-interactive"
+    exit 1
+  fi
+  dir="$(dirname "$dir")"
+done
+
+prefix="$(basename "$git_root")"
+remote="$(git remote get-url origin 2>/dev/null)" || { echo "No origin remote found"; exit 1; }
+
+# Convert git@github.com:org/repo.git to git+ssh://git@github.com/org/repo.git
+if [[ "$remote" == git@* ]]; then
+  dolt_remote="git+ssh://${remote%%:*}/${remote#*:}"
+else
+  dolt_remote="$remote"
+fi
+
+# Each step is idempotent -- safe to re-run if a previous run failed partway
+# Check for config.yaml, not just .beads/ -- a partial init leaves .beads/ without it
+if [ ! -f ".beads/config.yaml" ]; then
+  rm -rf .beads 2>/dev/null
+  bd init --stealth --prefix "$prefix" --non-interactive
+else
+  echo "Beads already initialized (prefix=$prefix)"
+fi
+
+if ! bd hooks list 2>/dev/null | grep -q "✓.*pre-push"; then
+  bd hooks install
+else
+  echo "Hooks already installed"
+fi
+
+if ! bd dolt show 2>/dev/null | grep -q "origin"; then
+  bd dolt remote add origin "$dolt_remote"
+else
+  echo "Dolt remote already configured"
+fi
+
+if ! git ls-remote origin 2>/dev/null | grep -q "refs/dolt/data"; then
+  bd dolt push
+else
+  echo "Dolt data already on remote"
+fi
+
+echo ""
+echo "Beads ready: prefix=$prefix, remote=$dolt_remote"
