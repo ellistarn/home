@@ -44,7 +44,10 @@ sync_credentials() {
     local ok=0
     for f in "$COOKIE_FILE" "$SSH_CERT"; do
         [[ -f "$f" ]] || continue
-        if scp -q -o ConnectTimeout=5 "$f" "$HOST:$f" 2>/dev/null; then
+        # Use ~/ destination so paths resolve on the remote host,
+        # not the local one (macOS /Users/x vs Linux /home/x).
+        local dest="~/${f#"$HOME"/}"
+        if scp -q -o ConnectTimeout=5 "$f" "$HOST:$dest" 2>/dev/null; then
             echo "Synced $(basename "$f") → $HOST"
         else
             echo "Failed to sync $(basename "$f") to $HOST" >&2
