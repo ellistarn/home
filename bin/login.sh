@@ -1,15 +1,14 @@
 #!/bin/bash
 
-# Idempotent gate for Midway auth and dev desktop tunnel.
+# Idempotent gate for Midway auth and credential sync.
 #
 # --check  (from .zshrc): read-only validation. Warns on problems, never prompts.
-# No args  (manual use): force-refresh cookie, restart tunnel, sync credentials to dev desktop.
+# No args  (manual use): force-refresh cookie, sync credentials to dev desktop.
 
 COOKIE_FILE="$HOME/.midway/cookie"
 SSH_CERT="$HOME/.ssh/id_ecdsa-cert.pub"
 MIDWAY_URL="https://midway-auth.amazon.com/"
 HOST="${DEV_DESKTOP_HOST:-}"
-PORT="${DEV_DESKTOP_TUNNEL_PORT:-}"
 
 cookie_valid() {
     [[ -f "$COOKIE_FILE" ]] || return 1
@@ -35,19 +34,6 @@ ssh_cert_valid() {
     [[ -n "$exp_epoch" ]] && (( now_epoch < exp_epoch ))
 }
 
-tunnel_running() {
-    [[ -n "$HOST" ]] && [[ -n "$PORT" ]] && lsof -i :"$PORT" -sTCP:LISTEN &>/dev/null
-}
-
-kill_tunnel() {
-    [[ -n "$PORT" ]] && lsof -ti :"$PORT" -sTCP:LISTEN 2>/dev/null | xargs kill 2>/dev/null
-}
-
-start_tunnel() {
-    [[ -n "$HOST" ]] && [[ -n "$PORT" ]] || return 0
-    ssh -f -N -o ConnectTimeout=5 -L "$PORT":localhost:"$PORT" "$HOST" 2>/dev/null
-}
-
 # Sync midway cookie and SSH certificate to the dev desktop so that
 # a single mwinit on the laptop covers both machines.  Requires the
 # same ~/.ssh/id_ecdsa key pair on both hosts.
@@ -69,10 +55,9 @@ sync_credentials() {
     return $ok
 }
 
-if [[ "$1" == "--check" ]]; then
+if [[ "${1:-}" == "--check" ]]; then
     cookie_valid || { echo "Midway cookie is invalid or missing. Run login.sh to refresh."; }
     ssh_cert_valid || { echo "SSH certificate is expired or missing. Run login.sh to refresh."; }
-    tunnel_running || start_tunnel
 else
     echo "Refreshing mwinit..."
     if ! mwinit -f; then
@@ -80,9 +65,5 @@ else
         rm -f "$COOKIE_FILE"
         exit 1
     fi
-    kill_tunnel
-    start_tunnel
-    sleep 1
-    tunnel_running || { echo "Tunnel failed to start to $HOST:$PORT" >&2; exit 1; }
     sync_credentials
 fi
