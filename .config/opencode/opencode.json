@@ -37,6 +37,9 @@
       }
     }
   },
+  "permission": {
+    "todowrite": "deny"
+  },
   "instructions": [],
   "tools": {
     "builder-mcp_*": true,
