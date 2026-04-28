@@ -53,6 +53,7 @@ done
 ##### Amazon #####
 path+=($HOME/.toolbox/bin)
 export AWS_ACCOUNT_ID=767520670908
+export AWS_EC2_METADATA_DISABLED=true
 export DEV_DESKTOP_HOST=dev-dsk-etarn-2b-45df6bed.us-west-2.amazon.com
 ~/bin/login.sh --check
 
