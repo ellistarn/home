@@ -50,10 +50,6 @@ bin/.*
 !.agents/skills
 !.agents/skills/**
 
-# code-server
-!.config/code-server
-!.config/code-server/config.yaml
-
 # OpenCode
 !opencode.json
 !.AGENTS.md
