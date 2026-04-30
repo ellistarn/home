@@ -5,10 +5,11 @@ description: Regenerate AGENTS.md from scratch. Load when the repo's agent refer
 
 # Maintain AGENTS.md
 
-`AGENTS.md` is a map of the repository. An agent reading it should understand what the repo
-contains, where things live, and how they relate — without exploring the codebase. If an agent
-still has to search to understand what's here, the document failed. Implementation details belong
-in source files, not here.
+`README.md` is for humans. `AGENTS.md` is for agents. This skill produces only `AGENTS.md` — a
+structured reference that lets an agent understand what the repo contains, where things live, and
+how they relate without exploring the codebase. If an agent still has to search after reading it,
+the document failed. Do not modify `README.md`. Do not include implementation details that belong
+in source files.
 
 It is regenerated from scratch every time — never patched, never carried forward.
 
