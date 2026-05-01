@@ -62,6 +62,18 @@
     },
     "explore": {
       "model": "amazon-bedrock/us.anthropic.claude-sonnet-4-6"
+    },
+    "muse": {
+      "description": "Your design instincts and thinking patterns. Consult on design decisions, naming, and architectural tradeoffs.",
+      "mode": "subagent",
+      "prompt": "{file:~/.muse/muse.md}",
+      "permission": {
+        "bash": "deny",
+        "edit": "deny",
+        "glob": "deny",
+        "grep": "deny",
+        "task": "deny"
+      }
     }
   }
 }

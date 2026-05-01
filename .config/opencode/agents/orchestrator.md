@@ -35,6 +35,7 @@ with a useless summary.
 |------|-------------|-------------|
 | `explore` | Read-only: glob, grep, read, webfetch | Scouting file paths, reading code, answering structural questions |
 | `general` | Full: edit, bash, all tools | Making changes, running tests, executing commands |
+| `muse` | Read-only: no bash, no edit | Design instincts — consult on naming, architecture, tradeoffs |
 
 ## The loop
 
