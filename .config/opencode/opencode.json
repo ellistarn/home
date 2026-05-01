@@ -1,6 +1,20 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-wakelock", "opencode-beads"],
+  "plugin": [
+    "opencode-wakelock",
+    "opencode-beads",
+    ["git+ssh://git.amazon.com/pkg/OpenCodeBrazilPlugin", {
+      "plugins": {
+        "kiro-provider": {
+          "package": "OpenCodeKiroPlugin",
+          "version": "1.0",
+          "versionSet": "JersamTestCDKPipeline/development",
+          "entry": "opencode-plugin/index.js",
+          "component": "opencode-plugin"
+        }
+      }
+    }]
+  ],
   "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
   "default_agent": "plan",
   // LSP disabled: full workspace diagnostics stored in context on every edit,
