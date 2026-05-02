@@ -50,26 +50,37 @@
   },
   "agent": {
     "build": {
-      "variant": "medium",
-      "permission": {
-        "doom_loop": "deny",
-        "external_directory": "deny",
-        "question": "deny"
-      }
+      "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
+      "variant": "medium"
     },
     "plan": {
+      "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
       "variant": "medium"
     },
     "explore": {
       "model": "amazon-bedrock/us.anthropic.claude-sonnet-4-6"
     },
     "orchestrator": {
-      "variant": "medium"
+      "description": "Decomposes work and dispatches subagents for speed and quality. Cannot read or edit files directly.",
+      "mode": "primary",
+      "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
+      "variant": "high",
+      "prompt": "{file:{env:HOME}/.config/opencode/agents/orchestrator.md}",
+      "permission": {
+        "*": "deny",
+        "bash": {
+          "*": "deny",
+          "bd *": "allow"
+        },
+        "task": "allow",
+        "question": "allow"
+      }
     },
     "muse": {
       "description": "Your design instincts and thinking patterns. Consult on design decisions, naming, and architectural tradeoffs.",
       "mode": "all",
-      "variant": "medium",
+      "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
+      "variant": "high",
       "prompt": "{file:{env:HOME}/.muse/muse.md}",
       "permission": {
         "bash": "deny",
