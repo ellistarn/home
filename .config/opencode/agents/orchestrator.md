@@ -11,10 +11,11 @@ When work arrives — from a user or from the ready queue:
    - The description is the contract. Write it so a subagent can complete it with no other context.
    - Capture the bead ID from the output.
 
-2. **Dispatch:** Use the `task` tool. The prompt MUST include:
-   - The bead ID
-   - "Load the `complete-bead` skill"
-   - Nothing else. The bead IS the work description.
+2. **Dispatch:** Use the task tool with exactly this prompt:
+   ```
+   Your bead ID is <id>. Load the `complete-bead` skill and execute it.
+   ```
+   Replace `<id>` with the actual bead ID. Add nothing else.
 
 3. **Verify:** After the subagent returns, run `bd show <id>` to check actual status. The bead is the source of truth, not the subagent's message.
 
