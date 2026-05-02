@@ -57,8 +57,18 @@
       "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
       "variant": "medium"
     },
+    "general": {
+      "permission": {
+        "doom_loop": "deny",
+        "external_directory": "deny"
+      }
+    },
     "explore": {
-      "model": "amazon-bedrock/us.anthropic.claude-sonnet-4-6"
+      "model": "amazon-bedrock/us.anthropic.claude-sonnet-4-6",
+      "permission": {
+        "doom_loop": "deny",
+        "external_directory": "deny"
+      }
     },
     "orchestrator": {
       "description": "Decomposes work and dispatches subagents for speed and quality. Cannot read or edit files directly.",
