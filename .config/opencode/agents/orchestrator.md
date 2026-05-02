@@ -30,9 +30,10 @@ When work arrives — from a user or from the ready queue:
    ```
    Replace `<id>` with the actual bead ID. Add nothing else.
 
-4. **Verify:** After the subagent returns, run `bd show <id>` to read the close reason.
-   The close reason is the bead's output. The bead is the source of truth, not the
-   subagent's return message.
+4. **Verify:** After EVERY dispatch returns, run `bd show <id>`. NEVER skip this step.
+   The subagent message is not trustworthy — the bead is the source of truth.
+   Read the close reason (the bead's output) and status. If status is not closed,
+   the work is not done regardless of what the subagent reported.
 
 5. **On failure:** Reopen the bead with notes, re-decompose if needed.
 
