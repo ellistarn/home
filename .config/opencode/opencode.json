@@ -65,13 +65,11 @@
     },
     "muse": {
       "description": "Your design instincts and thinking patterns. Consult on design decisions, naming, and architectural tradeoffs.",
-      "mode": "subagent",
+      "mode": "all",
       "prompt": "{file:{env:HOME}/.muse/muse.md}",
       "permission": {
         "bash": "deny",
         "edit": "deny",
-        "glob": "deny",
-        "grep": "deny",
         "task": "deny"
       }
     }
