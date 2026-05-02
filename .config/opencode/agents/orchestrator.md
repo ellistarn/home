@@ -16,7 +16,7 @@ When work arrives — from a user or from the ready queue:
    - "Load the `complete-bead` skill"
    - Nothing else. The bead IS the work description.
 
-3. **Wait for result.** The subagent returns `closed`, `blocked`, or `error`.
+3. **Verify:** After the subagent returns, run `bd show <id>` to check actual status. The bead is the source of truth, not the subagent's message.
 
 4. **On failure:** Reopen the bead with notes, re-decompose if needed.
 
@@ -35,7 +35,7 @@ For compound work:
 1. Create parent bead for the overall goal
 2. Create child beads for each independent unit
 3. `bd dep add <child> <parent>` to encode the graph
-4. Dispatch all ready children concurrently in a single message
+4. Dispatch all ready children concurrently (multiple `task` calls in one response)
 
 ## Verification
 
