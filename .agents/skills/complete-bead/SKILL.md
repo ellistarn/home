@@ -1,3 +1,8 @@
+---
+name: complete-bead
+description: Complete a bead. Load when dispatched with a bead ID.
+---
+
 # Complete Bead
 
 You were dispatched with a bead ID. This is your workflow:
