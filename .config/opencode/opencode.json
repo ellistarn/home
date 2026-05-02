@@ -77,7 +77,6 @@
       "prompt": "{file:{env:HOME}/.config/opencode/agents/orchestrator.md}",
       "permission": {
         "*": "deny",
-        "bash": "deny",
         "task": "allow",
         "question": "allow"
       }
