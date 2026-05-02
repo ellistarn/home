@@ -78,7 +78,8 @@
       "permission": {
         "*": "deny",
         "task": "allow",
-        "question": "allow"
+        "question": "allow",
+        "skill": "allow"
       }
     },
     "muse": {
