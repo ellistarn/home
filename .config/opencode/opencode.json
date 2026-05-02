@@ -59,26 +59,15 @@
     },
     "general": {
       "permission": {
-        "bash": "allow",
-        "edit": "allow",
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "task": "allow",
-        "external_directory": "allow",
-        "todowrite": "deny"
+        "doom_loop": "allow",
+        "external_directory": "allow"
       }
     },
     "explore": {
       "model": "amazon-bedrock/us.anthropic.claude-sonnet-4-6",
       "permission": {
-        "bash": "deny",
-        "edit": "deny",
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "task": "deny",
-        "todowrite": "deny"
+        "doom_loop": "allow",
+        "external_directory": "allow"
       }
     },
     "orchestrator": {
