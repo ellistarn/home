@@ -57,6 +57,8 @@
       "variant": "medium"
     },
     "general": {
+      "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
+      "variant": "medium",
       "permission": {
         "doom_loop": "deny",
         "external_directory": "deny"
