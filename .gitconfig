@@ -5,7 +5,7 @@
 
 [core]
 	pager = less -FMRiX
-	editor = vim
+	editor = true
 	excludesfile = ~/.gitignore.global
 
 [push]
