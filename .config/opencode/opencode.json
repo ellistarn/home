@@ -91,7 +91,13 @@
       "variant": "high",
       "prompt": "{file:{env:HOME}/.muse/muse.md}",
       "permission": {
-        "bash": "deny",
+        "bash": {
+          "*": "deny",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "git log": "allow",
+          "git log *": "allow"
+        },
         "edit": "deny",
         "task": "deny"
       }
