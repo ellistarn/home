@@ -78,5 +78,6 @@
   },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true
-  }
+  },
+  "autoCompactEnabled": false
 }
