@@ -79,7 +79,8 @@
         "*": "deny",
         "task": "allow",
         "question": "allow",
-        "skill": "allow"
+        "skill": "allow",
+        "todo": "allow"
       }
     },
     "muse": {
