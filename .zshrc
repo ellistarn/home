@@ -30,17 +30,20 @@ fi
 ##### Zsh #####
 
 ##### Paths #####
-path+=($HOME/bin)
-path+=($HOME/.local/bin)
-path+=($HOME/.opencode/bin)
-path+=(/opt/homebrew/bin)
-path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
-path+=($HOME/go/bin)
-path+=(/opt/homebrew/opt/python@3.14/libexec/bin)
-path+=($HOME/.cargo/bin)
-path+=($HOME/.bun/bin)
-path+=(/usr/local/go/bin)
-path+=(/usr/local/bin)
+path=(
+  $HOME/bin
+  $HOME/.local/bin
+  $HOME/.opencode/bin
+  $HOME/go/bin
+  $HOME/.cargo/bin
+  $HOME/.bun/bin
+  /opt/homebrew/bin
+  /opt/homebrew/opt/python@3.14/libexec/bin
+  /usr/local/opt/gnu-sed/libexec/gnubin
+  /usr/local/go/bin
+  /usr/local/bin
+  $path
+)
 
 ##### Scripts #####
 for dir in $(find "$HOME/bin" -type d); do
