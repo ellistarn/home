@@ -1,4 +1,11 @@
 {
+  "autoCompactEnabled": false,
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true
+  },
+  "env": {
+  },
+  "model": "us.anthropic.claude-opus-4-6-v1",
   "permissions": {
     "allow": [
       "AskUserQuestion",
@@ -71,13 +78,8 @@
       "mcp__aws-knowledge__*"
     ]
   },
-  "model": "us.anthropic.claude-opus-4-6-v1",
   "statusLine": {
-    "type": "command",
-    "command": "/Users/etarn/.claude/statusline.sh"
-  },
-  "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true
-  },
-  "autoCompactEnabled": false
+    "command": "/Users/etarn/.claude/statusline.sh",
+    "type": "command"
+  }
 }

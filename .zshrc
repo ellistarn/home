@@ -30,11 +30,11 @@ fi
 ##### Zsh #####
 
 ##### Paths #####
-path+=($HOME/bin)
-path+=($HOME/.local/bin)
+path=($HOME/bin $HOME/.local/bin $path)
+
 path+=($HOME/.opencode/bin)
 path+=(/opt/homebrew/bin)
-path+="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH" # GNU Sed for compatibility
+path+=(/usr/local/opt/gnu-sed/libexec/gnubin) # GNU Sed for compatibility
 path+=($HOME/go/bin)
 path+=(/opt/homebrew/opt/python@3.14/libexec/bin)
 path+=($HOME/.cargo/bin)
