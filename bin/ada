@@ -1,7 +1,13 @@
 #!/bin/bash
 set -u
 
-REAL_ADA="/Users/etarn/.toolbox/bin/ada"
+# Find real ada by searching PATH, skipping this shim
+SELF="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+REAL_ADA=$(which -a ada 2>/dev/null | grep -v "$SELF" | head -1)
+if [[ -z "$REAL_ADA" ]]; then
+    echo "ada: real binary not found in PATH" >&2
+    exit 1
+fi
 TIMEOUT=900
 
 # Pass through if not "credentials print"
