@@ -1,7 +1,13 @@
 #!/bin/bash
 set -u
 
-REAL_AWS="/usr/local/bin/aws"
+# Find real aws by searching PATH, skipping this shim
+SELF="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+REAL_AWS=$(which -a aws 2>/dev/null | grep -v "$SELF" | head -1)
+if [[ -z "$REAL_AWS" ]]; then
+    echo "aws: real binary not found in PATH" >&2
+    exit 1
+fi
 TIMEOUT=600
 
 # Pass through if not "eks get-token"
