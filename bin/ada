@@ -1,0 +1,56 @@
+#!/bin/bash
+set -u
+
+REAL_ADA="/Users/etarn/.toolbox/bin/ada"
+TIMEOUT=900
+
+# Pass through if not "credentials print"
+if [[ "${1:-}" != "credentials" || "${2:-}" != "print" ]]; then
+    exec "$REAL_ADA" "$@"
+fi
+
+# Cross-platform mtime
+get_mtime() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        stat -f %m "$1"
+    else
+        stat -c %Y "$1"
+    fi
+}
+
+# Add defaults if not already provided
+args=("$@")
+if [[ "$*" != *"--account"* && -n "${AWS_ACCOUNT_ID:-}" ]]; then
+    args+=(--account "$AWS_ACCOUNT_ID")
+fi
+if [[ "$*" != *"--role"* ]]; then
+    args+=(--role "${AWS_ACCOUNT_ROLE:-Admin}")
+fi
+
+CACHE_FILE="/tmp/ada_credentials_$(echo "${args[*]}" | md5sum | cut -d' ' -f1)"
+
+# Clean up expired cache files
+for cache in /tmp/ada_credentials_*; do
+    [[ -f "$cache" ]] || continue
+    AGE=$(($(date +%s) - $(get_mtime "$cache")))
+    [[ $AGE -gt $TIMEOUT ]] && rm -f "$cache"
+done
+
+# Serve from cache if fresh
+if [[ -f "$CACHE_FILE" ]]; then
+    AGE=$(($(date +%s) - $(get_mtime "$CACHE_FILE")))
+    if [[ $AGE -le $TIMEOUT ]]; then
+        cat "$CACHE_FILE"
+        exit 0
+    fi
+fi
+
+# Cache miss — call real ada
+CREDENTIALS=$("$REAL_ADA" "${args[@]}" 2>&1)
+RC=$?
+if [[ $RC -eq 0 ]]; then
+    echo "$CREDENTIALS" | tee "$CACHE_FILE"
+else
+    echo "$CREDENTIALS" >&2
+    exit $RC
+fi
