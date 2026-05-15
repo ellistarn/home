@@ -42,21 +42,33 @@ for cache in /tmp/ada_credentials_*; do
     [[ $AGE -gt $TIMEOUT ]] && rm -f "$cache"
 done
 
-# Serve from cache if fresh
+# Serve from cache if fresh and not near expiration
 if [[ -f "$CACHE_FILE" ]]; then
     AGE=$(($(date +%s) - $(get_mtime "$CACHE_FILE")))
     if [[ $AGE -le $TIMEOUT ]]; then
-        cat "$CACHE_FILE"
-        exit 0
+        # Check the credential's actual Expiration field
+        EXPIRATION=$(grep -o '"Expiration":"[^"]*"' "$CACHE_FILE" | cut -d'"' -f4)
+        if [[ -n "$EXPIRATION" ]]; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                EXP_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$EXPIRATION" +%s 2>/dev/null)
+            else
+                EXP_EPOCH=$(date -d "$EXPIRATION" +%s 2>/dev/null)
+            fi
+            NOW=$(date +%s)
+            REMAINING=$((EXP_EPOCH - NOW))
+            if [[ $REMAINING -gt 300 ]]; then
+                cat "$CACHE_FILE"
+                exit 0
+            fi
+        fi
     fi
 fi
 
 # Cache miss — call real ada
-CREDENTIALS=$("$REAL_ADA" "${args[@]}" 2>&1)
+CREDENTIALS=$("$REAL_ADA" "${args[@]}")
 RC=$?
 if [[ $RC -eq 0 ]]; then
     echo "$CREDENTIALS" | tee "$CACHE_FILE"
 else
-    echo "$CREDENTIALS" >&2
     exit $RC
 fi
