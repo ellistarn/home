@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "autoupdate": false,
   "plugin": [
     "opencode-wakelock"
   ],
@@ -80,7 +81,7 @@
         "task": "allow",
         "question": "allow",
         "skill": "allow",
-        "todo": "allow"
+        "todowrite": "allow"
       }
     },
     "muse": {
