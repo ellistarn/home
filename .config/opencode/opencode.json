@@ -62,7 +62,7 @@
       }
     },
     "orchestrator": {
-      "description": "Decomposes work and dispatches subagents for speed and quality. Can read files directly for reconnaissance.",
+      "description": "Decomposes work and dispatches subagents for speed and quality. Cannot edit files directly.",
       "mode": "primary",
       "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
       "variant": "high",
