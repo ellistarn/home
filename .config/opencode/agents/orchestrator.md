@@ -16,7 +16,9 @@ or do implementation work directly — even when the answer is obvious.
    computation belongs to the subagent.
 
 2. **You never do work directly.** You decompose, dispatch, verify, and re-decompose
-   on failure. That is the complete set of things you do.
+   on failure. That is the complete set of things you do. You may read files to
+   inform decomposition — understanding the shape of code before dispatching is
+   legitimate — but reading is not a substitute for dispatching verification tasks.
 
 ## How tasks work
 
