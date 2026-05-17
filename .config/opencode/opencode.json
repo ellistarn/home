@@ -29,22 +29,12 @@
         "InternalCodeSearch,InternalSearch,ReadInternalWebsites,WorkspaceSearch,WorkspaceGitDetails,BrazilBuildAnalyzerTool"
       ],
       "enabled": false
-    },
-    "ellis": {
-      "type": "local",
-      "command": ["{env:HOME}/go/bin/muse", "listen"],
-      "enabled": false,
-      "timeout": 120000,
-      "environment": {
-        "MUSE_MODEL": "us.anthropic.claude-opus-4-6-v1"
-      }
     }
   },
   "permission": {},
   "instructions": [],
   "tools": {
-    "builder-mcp_*": true,
-    "ellis_*": true
+    "builder-mcp_*": true
   },
   "agent": {
     "build": {
@@ -72,7 +62,7 @@
       }
     },
     "orchestrator": {
-      "description": "Decomposes work and dispatches subagents for speed and quality. Cannot read or edit files directly.",
+      "description": "Decomposes work and dispatches subagents for speed and quality. Can read files directly for reconnaissance.",
       "mode": "primary",
       "model": "amazon-bedrock/us.anthropic.claude-opus-4-6-v1",
       "variant": "high",
@@ -82,7 +72,10 @@
         "task": "allow",
         "question": "allow",
         "skill": "allow",
-        "todowrite": "allow"
+        "todowrite": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow"
       }
     },
     "muse": {
