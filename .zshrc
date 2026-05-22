@@ -126,6 +126,7 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 
 zstyle ':completion:*' insert-tab pending                                       # pasting with tabs doesn't perform completion
 zstyle ':completion:*' completer _expand _complete _files _correct _approximate # default to file completion
 
+rm -f ~/.antigen/.zcompdump.zwc # antigen's background zcompile races with dump regeneration
 autoload -Uz compinit && compinit
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 [[ -r "/usr/local/bin/aws_completer" ]] && complete -C "/usr/local/bin/aws_completer" aws
