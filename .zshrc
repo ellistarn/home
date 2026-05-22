@@ -126,10 +126,10 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 
 zstyle ':completion:*' insert-tab pending                                       # pasting with tabs doesn't perform completion
 zstyle ':completion:*' completer _expand _complete _files _correct _approximate # default to file completion
 
+fpath=(~/.zsh/completions $fpath)
 autoload -Uz compinit && compinit
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 [[ -r "/usr/local/bin/aws_completer" ]] && complete -C "/usr/local/bin/aws_completer" aws
-source <(kubectl completion zsh)
 
 function instanceid() {
   kubectl get node $1 -ojson | jq -r ".spec.providerID" | cut -f5 -d'/'
