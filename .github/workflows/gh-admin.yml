@@ -1,0 +1,33 @@
+# Capability workflow: general-purpose `gh` escape hatch for Claude Code
+# sessions, for account-level operations the session proxy blocks (anything
+# outside repos/{owner}/{repo}/...).
+#
+# Security model: only actors with write access to this repo can dispatch
+# this workflow (you and the Claude app), and the run log is the audit trail.
+# The command runs with GH_ADMIN_TOKEN, so treat this workflow's ACL as the
+# ACL of that PAT.
+name: gh-admin
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: gh command to run (without the leading "gh"), e.g. `repo list --limit 100`
+        required: true
+        type: string
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+      GH_COMMAND: ${{ inputs.command }}
+    steps:
+      - name: Run gh command
+        run: |
+          echo "::notice::gh ${GH_COMMAND}"
+          {
+            echo '## Output'
+            echo '```'
+            eval "gh ${GH_COMMAND}" 2>&1
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

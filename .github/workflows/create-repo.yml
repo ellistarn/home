@@ -1,0 +1,64 @@
+# Capability workflow: lets Claude Code sessions create repositories.
+#
+# Cloud Claude sessions are egress-limited to repo-scoped GitHub endpoints,
+# so they cannot call POST /user/repos directly. Actions runners have no such
+# restriction. Claude triggers this via workflow_dispatch; the repo is created
+# with the GH_ADMIN_TOKEN secret (a PAT you control).
+#
+# Setup (one time): Settings -> Secrets and variables -> Actions -> new secret
+#   GH_ADMIN_TOKEN = classic PAT with `repo` scope (add `delete_repo` if you
+#   want the delete capability too), or a fine-grained PAT with
+#   "All repositories" + Administration: write + Contents: write.
+name: create-repo
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: Repository name (created under your user account)
+        required: true
+        type: string
+      visibility:
+        description: Repository visibility
+        type: choice
+        options: [private, public]
+        default: private
+      repo_description:
+        description: Repository description
+        type: string
+        default: ""
+      grant_claude:
+        description: Also add the repo to the Claude GitHub App installation
+        type: boolean
+        default: true
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+      REPO_NAME: ${{ inputs.name }}
+      REPO_DESC: ${{ inputs.repo_description }}
+      VISIBILITY: ${{ inputs.visibility }}
+    steps:
+      - name: Create repository
+        run: |
+          gh repo create "${GITHUB_REPOSITORY_OWNER}/${REPO_NAME}" \
+            --"${VISIBILITY}" \
+            --description "${REPO_DESC}" \
+            --add-readme
+          echo "Created https://github.com/${GITHUB_REPOSITORY_OWNER}/${REPO_NAME}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Grant Claude GitHub App access
+        if: ${{ inputs.grant_claude }}
+        continue-on-error: true
+        run: |
+          repo_id=$(gh api "repos/${GITHUB_REPOSITORY_OWNER}/${REPO_NAME}" --jq .id)
+          installation_id=$(gh api /user/installations --jq \
+            '.installations[] | select(.app_slug == "claude") | .id')
+          if [ -z "$installation_id" ]; then
+            echo "Could not find the Claude app installation with this token;" \
+                 "grant access manually at github.com/settings/installations." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          gh api -X PUT "/user/installations/${installation_id}/repositories/${repo_id}"
+          echo "Granted Claude app access to ${REPO_NAME}" >> "$GITHUB_STEP_SUMMARY"
