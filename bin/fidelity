@@ -1,0 +1,213 @@
+#!/usr/bin/env -S uv run --quiet --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["playwright==1.55.0"]
+# ///
+"""Read-only Fidelity export.
+
+  fidelity sync      Open a browser, wait for you to log in, download positions + activity CSVs
+  fidelity summary   Print holdings by account from the latest positions CSV (--json for machine use)
+
+You log in yourself; credentials are never seen or stored. The browser profile in
+~/.fidelity/profile persists cookies between runs, so ticking "remember this device"
+skips 2FA next time (and login entirely while Fidelity's session lasts).
+
+Read-only by construction: the script only visits the positions and activity pages
+and clicks Download. As a backstop, page loads of trade/transfer/account-opening URLs
+are aborted. Output lands in ~/.fidelity/<date>/ with ~/.fidelity/latest pointing at it.
+
+Env:
+  FIDELITY_HOME     data + profile dir (default ~/.fidelity)
+  FIDELITY_BROWSER  "chrome" (default, uses installed Google Chrome) or a path to a Chromium binary
+"""
+
+import csv
+import datetime as dt
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+HOME = Path(os.environ.get("FIDELITY_HOME", Path.home() / ".fidelity"))
+PROFILE = HOME / "profile"
+BASE = "https://digital.fidelity.com/ftgw/digital/portfolio"
+POSITIONS_URL = f"{BASE}/positions"
+ACTIVITY_URL = f"{BASE}/activity"
+LOGIN_TIMEOUT_MS = 10 * 60 * 1000
+LOAD_TIMEOUT_MS = 2 * 60 * 1000
+
+# Pages that can move money or place orders. Any navigation matching these is aborted.
+BLOCKED = re.compile(r"trade|transfer|orderentry|/aox/|billpay|moneymovement|withdraw", re.I)
+
+
+def log(msg):
+    print(f"fidelity: {msg}", file=sys.stderr)
+
+
+# ---------------------------------------------------------------- sync
+
+
+def sync(base_url=BASE):
+    from playwright.sync_api import Error, sync_playwright
+
+    out = HOME / dt.date.today().isoformat()
+    out.mkdir(parents=True, exist_ok=True)
+    PROFILE.mkdir(parents=True, exist_ok=True)
+    os.chmod(HOME, 0o700)
+
+    browser = os.environ.get("FIDELITY_BROWSER", "chrome")
+    launch = {"channel": "chrome"} if browser == "chrome" else {"executable_path": browser}
+
+    failures = 0
+    with sync_playwright() as p:
+        ctx = p.chromium.launch_persistent_context(
+            PROFILE, headless=os.environ.get("FIDELITY_HEADLESS") == "1", accept_downloads=True, **launch
+        )
+        ctx.route("**/*", _guard)
+        page = ctx.pages[0] if ctx.pages else ctx.new_page()
+
+        _ensure_logged_in(page, f"{base_url}/positions")
+        for name, fn in (("positions", _download_positions), ("activity", _download_activity)):
+            try:
+                path = fn(page, base_url, out)
+                log(f"saved {path}")
+            except Error as e:
+                failures += 1
+                shot = out / f"debug-{name}.png"
+                page.screenshot(path=shot, full_page=True)
+                (out / f"debug-{name}.html").write_text(page.content())
+                log(f"{name} download failed ({e.message.splitlines()[0]}); see {shot}")
+        ctx.close()
+
+    latest = HOME / "latest"
+    latest.unlink(missing_ok=True)
+    latest.symlink_to(out.name)
+    return 1 if failures else 0
+
+
+def _guard(route):
+    req = route.request
+    if req.is_navigation_request() and BLOCKED.search(req.url):
+        log(f"blocked navigation to {req.url}")
+        return route.abort()
+    return route.continue_()
+
+
+def _ensure_logged_in(page, url):
+    page.goto(url)
+    if "/portfolio/" in page.url:
+        return
+    log("log in using the browser window (waiting up to 10 minutes)")
+    page.wait_for_url(re.compile(r"/ftgw/digital/portfolio/"), timeout=LOGIN_TIMEOUT_MS)
+    page.goto(url)
+
+
+def _download_positions(page, base_url, out):
+    page.goto(f"{base_url}/positions")
+    actions = page.get_by_role("button", name="Available Actions")
+    actions.wait_for(timeout=LOAD_TIMEOUT_MS)
+    actions.click()
+    with page.expect_download() as d:
+        page.get_by_role("menuitem", name="Download").click()
+    return _save(d.value, out / "positions.csv")
+
+
+def _download_activity(page, base_url, out):
+    page.goto(f"{base_url}/activity")
+    download = page.get_by_role("button", name=re.compile("download", re.I)).first
+    download.wait_for(timeout=LOAD_TIMEOUT_MS)
+    _widen_activity_range(page)
+    with page.expect_download() as d:
+        download.click()
+    return _save(d.value, out / "activity.csv")
+
+
+def _widen_activity_range(page):
+    # Best effort: the default range is short; pick the widest preset offered (Fidelity caps at 90 days).
+    from playwright.sync_api import Error
+
+    try:
+        page.get_by_role("button", name=re.compile(r"past \d+ days|time period|date range", re.I)).first.click(timeout=5000)
+        page.get_by_text(re.compile(r"past 90 days", re.I)).first.click(timeout=5000)
+        page.wait_for_timeout(2000)
+    except Error:
+        log("couldn't change activity date range; using the page default")
+
+
+def _save(download, dest):
+    download.save_as(dest)
+    return dest
+
+
+# ---------------------------------------------------------------- summary
+
+
+def summary(as_json=False):
+    path = HOME / "latest" / "positions.csv"
+    if not path.exists():
+        log(f"no {path}; run `fidelity sync` first")
+        return 1
+    accounts = parse_positions(path)
+    if as_json:
+        json.dump(accounts, sys.stdout, indent=2)
+        print()
+        return 0
+    grand = 0.0
+    for acct in accounts:
+        print(f"\n{acct['name']} ({acct['number']})  ${acct['value']:,.2f}")
+        for h in sorted(acct["holdings"], key=lambda h: -h["value"]):
+            qty = "" if h["quantity"] is None else f"{h['quantity']:,.3f}"
+            print(f"  {h['symbol']:<10} {qty:>14} {h['value']:>14,.2f}  {h['description']}")
+        grand += acct["value"]
+    print(f"\nTotal  ${grand:,.2f}")
+    return 0
+
+
+def parse_positions(path):
+    """Group a Fidelity positions CSV into accounts; skips the trailing disclaimer rows."""
+    accounts = {}
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            number = (row.get("Account Number") or "").strip()
+            symbol = (row.get("Symbol") or "").strip()
+            if not number or not symbol or " " in number:
+                continue
+            acct = accounts.setdefault(
+                number, {"number": number, "name": (row.get("Account Name") or "").strip(), "value": 0.0, "holdings": []}
+            )
+            value = money(row.get("Current Value")) or 0.0
+            acct["value"] += value
+            acct["holdings"].append(
+                {
+                    "symbol": symbol.rstrip("*"),
+                    "description": (row.get("Description") or "").strip(),
+                    "quantity": money(row.get("Quantity")),
+                    "last_price": money(row.get("Last Price")),
+                    "value": value,
+                    "cost_basis": money(row.get("Cost Basis Total")),
+                }
+            )
+    return list(accounts.values())
+
+
+def money(s):
+    s = (s or "").strip().replace("$", "").replace(",", "").replace("+", "")
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def main(argv):
+    cmd = argv[1] if len(argv) > 1 else ""
+    if cmd == "sync":
+        return sync()
+    if cmd == "summary":
+        return summary(as_json="--json" in argv)
+    print(__doc__.strip())
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
